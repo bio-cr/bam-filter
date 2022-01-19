@@ -30,6 +30,12 @@ end
 e = KE.new(expr)
 bam = HTS::Bam.open(ARGV[0])
 
+FLAG_NAMES = %w[paired proper_pair unmapped mate_unmapped
+                reverse mate_reverse read1 read2
+                secondary qcfail dup supplementary]
+
+use : Hash(String, Bool)
+{% begin %}
 use = {
   "mapq"  => expr.includes?("mapq"),
   "start" => expr.includes?("start"),
@@ -37,8 +43,13 @@ use = {
   "stop"  => expr.includes?("stop"),
   "name"  => expr.includes?("name"),
   "mpos"  => expr.includes?("mpos"),
-  "isize" => expr.includes?("isize")
+  "isize" => expr.includes?("isize"),
+  "flag"  => expr.includes?("flag"),
+  {% for name in FLAG_NAMES %}
+    "{{name.id}}" => expr.includes?("{{name.id}}"),
+  {% end %}
 }
+{% end %}
 
 bam.each do |r|
   e.clear
@@ -49,7 +60,12 @@ bam.each do |r|
   e.set("name",  r.qname)           if use["name"]
   e.set("mpos",  r.mate_pos)        if use["mpos"]
   e.set("isize", r.insert_size)     if use["isize"]
+  e.set("flag",  r.flag.value)      if use["flag"]
+  {% for name in FLAG_NAMES %}
+    e.set("{{name.id}}", (r.flag.{{name.id}}? ? 1 : 0)) if use["{{name.id}}"]
+  {% end %}
   puts r.to_s if e.bool
+
 end
 
 bam.close
