@@ -1,8 +1,8 @@
 
 all :
-	cc -shared -fPIC -o kexpr.so -c kexpr.c
-	crystal build bam-filter.cr
+	cc -shared -fPIC -o src/kexpr.so -c src/kexpr.c
+	crystal build src/bam-filter.cr
 
 clean :
-	rm kexpr.so
+	rm src/kexpr.so
 	rm bam-filter

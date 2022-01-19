@@ -10,7 +10,7 @@ OptionParser.parse do |parser|
   parser.on("-e EXPR", "--expression EXPR", "code") { |v| expr = v }
   # parser.on("-t", "--threads NUM") { |v| p v }
   # parser.on("-f", "--fasta PATH") { |v| p v }
-  parser.on("-d", "--debug", "print expression") { debug = true }
+  # parser.on("-d", "--debug", "print expression") { debug = true }
   parser.on("-t", "--help", "Show this help") do
     puts parser
     exit
