@@ -1,0 +1,11 @@
+name: bam-filter
+version: 0.0.0
+
+authors:
+  - kojix2 <2xijok@gmail.com>
+
+dependencies:
+  htslib:
+    github: bio-crystal/htslib.cr
+
+license: MIT

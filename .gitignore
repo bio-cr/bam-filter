@@ -1,3 +1,16 @@
+# Crystal  
+doc
+lib
+.crystal
+.shards
+app
+bin
+shard.lock
+docs
+bam-filter
+
+# C
+
 # Prerequisites
 *.d
 
