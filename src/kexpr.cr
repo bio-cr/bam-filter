@@ -1,4 +1,4 @@
-@[Link(ldflags:"-L #{__DIR__} -l:kexpr.so")]
+@[Link(ldflags: "-L #{__DIR__} -l:kexpr.so")]
 lib Kexpr
   fun parse = ke_parse(_s : LibC::Char*, err : LibC::Int*) : KexprT
   type KexprT = Void*

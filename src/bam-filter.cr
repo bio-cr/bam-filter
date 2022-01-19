@@ -64,8 +64,8 @@ bam.each do |r|
   {% for name in FLAG_NAMES %}
     e.set("{{name.id}}", (r.flag.{{name.id}}? ? 1 : 0)) if use["{{name.id}}"]
   {% end %}
+  
   puts r.to_s if e.bool
-
 end
 
 bam.close
