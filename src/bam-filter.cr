@@ -6,7 +6,7 @@ expr = ""
 debug = false
 
 OptionParser.parse do |parser|
-  parser.banner = "Usage: #{__FILE__} [options] <bam_file>"
+  parser.banner = "Usage: bam-filter [options] <bam_file>"
   parser.on("-e EXPR", "--expression EXPR", "code") { |v| expr = v }
   # parser.on("-t", "--threads NUM") { |v| p v }
   # parser.on("-f", "--fasta PATH") { |v| p v }
@@ -64,7 +64,7 @@ bam.each do |r|
   {% for name in FLAG_NAMES %}
     e.set("{{name.id}}", (r.flag.{{name.id}}? ? 1 : 0)) if use["{{name.id}}"]
   {% end %}
-  
+
   puts r.to_s if e.bool
 end
 
