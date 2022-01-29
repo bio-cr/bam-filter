@@ -4,14 +4,21 @@ require "htslib/hts/bam"
 
 expr = ""
 debug = false
+nthreads = 0
+input_file = ""
+output_file = "-"
+output_format = ""
 
 OptionParser.parse do |parser|
   parser.banner = "Usage: bam-filter [options] <bam_file>"
   parser.on("-e EXPR", "--expression EXPR", "code") { |v| expr = v }
-  # parser.on("-t", "--threads NUM") { |v| p v }
+  parser.on("-i PATH", "--input PATH") { |v| input_file = v }
+  parser.on("-o PATH", "--output PATH") { |v| output_file = v }
+  parser.on("-S", "--sam", "Output SAM") { output_format = ".sam" }
+  parser.on("-b", "--bam", "Output BAM") { output_format = ".bam" }
+  parser.on("-t NUM", "--threads NUM") { |v| nthreads = v.to_i }
   # parser.on("-f", "--fasta PATH") { |v| p v }
-  # parser.on("-d", "--debug", "print expression") { debug = true }
-  parser.on("-t", "--help", "Show this help") do
+  parser.on("-h", "--help", "Show this help") do
     puts parser
     exit
   end
@@ -22,13 +29,28 @@ OptionParser.parse do |parser|
   end
 end
 
-if ARGV.size != 1
+if input_file == ""
   STDERR.puts "ERROR: bam file is not specified."
   exit(1)
 end
 
+if output_format == ""
+  if File.extname(output_file) == ".sam"
+    output_format = ".sam"
+  elsif File.extname(output_file) == ".bam"
+    output_format = ".bam"
+  elsif output_file == "-"
+    output_format = ".sam"
+  else
+    output_format = ".bam"
+  end
+end
+
 e = KE.new(expr)
-bam = HTS::Bam.open(ARGV[0])
+bam = HTS::Bam.open(input_file, threads: nthreads)
+mode = (output_format == ".sam" ? "w" : "wb")
+bam_out = HTS::Bam.open(output_file, mode)
+bam_out.write_header(bam.header)
 
 FLAG_NAMES = %w[paired proper_pair unmapped mate_unmapped
                 reverse mate_reverse read1 read2
@@ -65,7 +87,8 @@ bam.each do |r|
     e.set("{{name.id}}", (r.flag.{{name.id}}? ? 1 : 0)) if use["{{name.id}}"]
   {% end %}
 
-  puts r.to_s if e.bool
+  bam_out.write(r) if e.bool
 end
 
 bam.close
+bam_out.close
