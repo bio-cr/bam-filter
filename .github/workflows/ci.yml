@@ -14,7 +14,7 @@ jobs:
         run: sudo apt -qy install libhts-dev
       - name: Install shards
         run: shards install
-      - name: Build
-        run: crystal build src/bam-filter.cr
+      - name: Make
+        run: make
       - name: Run tests
         run: crystal spec
