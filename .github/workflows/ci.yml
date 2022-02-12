@@ -10,6 +10,10 @@ jobs:
         uses: actions/checkout@v2
       - name: Install Crystal
         uses: crystal-lang/install-crystal@v1
+      - name: Install htslib-dev
+        run: sudo apt -qy install libhts-dev
+      - name: Install shards
+        run: shards install
       - name: Build
         run: crystal build src/bam-filter.cr
       - name: Run tests
