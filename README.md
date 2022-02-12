@@ -1,5 +1,7 @@
 # bam-filter
 
+[![.github/workflows/ci.yml](https://github.com/kojix2/bam-filter/actions/workflows/ci.yml/badge.svg)](https://github.com/kojix2/bam-filter/actions/workflows/ci.yml)
+
 Crystal implementation of [hts-nim-tools/bam-filter](https://github.com/brentp/hts-nim-tools)
 
 ```
