@@ -1,9 +1,23 @@
 
-all :
-	shards install
-	cc -shared -fPIC -o src/kexpr.so -c src/kexpr.c
-	crystal build src/bam-filter.cr
+CRYSTAL_BIN ?= crystal
+SHARDS_BIN ?= shards
+PREFIX ?= /usr/local
+PROGRAM ?= bam-filter
 
-clean :
+build: ${PROGRAM}
+
+${PROGRAM}:
+	${SHARDS_BIN} install
+	${CC} -shared -fPIC -o src/kexpr.so -c src/kexpr.c
+	${CRYSTAL_BIN} build src/bam-filter.cr
+
+clean:
 	rm src/kexpr.so
-	rm bam-filter
+	rm ${PROGRAM}
+
+install: build
+	mkdir -p ${PREFIX}/bin
+	cp ./${PROGRAM} ${PREFIX}/bin
+
+uninstall:
+	rm ${PREFIX}/bin/${PROGRAM}
