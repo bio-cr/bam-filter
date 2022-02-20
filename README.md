@@ -17,7 +17,6 @@ usage:
 ```
 Usage: bam-filter [options] <bam_file>
     -e EXPR, --expression EXPR       code
-    -i PATH                          --input PATH
     -o PATH                          --output PATH
     -S, --sam                        Output SAM
     -b, --bam                        Output BAM
