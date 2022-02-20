@@ -39,6 +39,11 @@ if input_file == ""
   exit(1)
 end
 
+if expr == ""
+  STDERR.puts "ERROR: no expression specified for -e"
+  exit(1)
+end
+
 if output_format == ""
   if File.extname(output_file) == ".sam"
     output_format = ".sam"
