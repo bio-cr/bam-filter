@@ -6,7 +6,7 @@ PROGRAM ?= bam-filter
 
 build: ${PROGRAM}
 
-${PROGRAM}:
+${PROGRAM}: src/bam-filter.cr
 	${SHARDS_BIN} install
 	${CC} -shared -fPIC -o src/kexpr.so -c src/kexpr.c
 	${CRYSTAL_BIN} build src/bam-filter.cr
