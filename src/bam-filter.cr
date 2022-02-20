@@ -1,3 +1,7 @@
+# Author: kojix2 <2xijok@gmail.com>
+# License: MIT
+# https://github.com/bio-crystal/bam-filter
+
 require "option_parser"
 require "./ke"
 require "htslib/hts/bam"
@@ -12,7 +16,6 @@ output_format = ""
 OptionParser.parse do |parser|
   parser.banner = "Usage: bam-filter [options] <bam_file>"
   parser.on("-e EXPR", "--expression EXPR", "code") { |v| expr = v }
-  parser.on("-i PATH", "--input PATH") { |v| input_file = v }
   parser.on("-o PATH", "--output PATH") { |v| output_file = v }
   parser.on("-S", "--sam", "Output SAM") { output_format = ".sam" }
   parser.on("-b", "--bam", "Output BAM") { output_format = ".bam" }
@@ -28,6 +31,8 @@ OptionParser.parse do |parser|
     exit(1)
   end
 end
+
+input_file = ARGV[0]
 
 if input_file == ""
   STDERR.puts "ERROR: bam file is not specified."
@@ -92,3 +97,4 @@ end
 
 bam.close
 bam_out.close
+
