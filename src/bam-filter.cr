@@ -30,12 +30,21 @@ OptionParser.parse do |parser|
     STDERR.puts parser
     exit(1)
   end
+  if ARGV.empty?
+    puts parser
+    exit(1)
+  end
 end
 
 input_file = ARGV[0]
 
 if input_file == ""
   STDERR.puts "ERROR: bam file is not specified."
+  exit(1)
+end
+
+if File.exists?(input_file)
+  STDERR.puts "ERROR: #{input_file} not found."
   exit(1)
 end
 
