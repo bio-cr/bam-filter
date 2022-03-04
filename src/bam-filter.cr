@@ -16,15 +16,21 @@ output_format = ""
 OptionParser.parse do |parser|
   parser.banner = "Usage: bam-filter [options] <bam_file>"
   parser.on("-e EXPR", "--expression EXPR", "code") { |v| expr = v }
+  parser.on("-t NUM", "--threads NUM") { |v| nthreads = v.to_i }
   parser.on("-o PATH", "--output PATH") { |v| output_file = v }
   parser.on("-S", "--sam", "Output SAM") { output_format = ".sam" }
   parser.on("-b", "--bam", "Output BAM") { output_format = ".bam" }
-  parser.on("-t NUM", "--threads NUM") { |v| nthreads = v.to_i }
   # parser.on("-f", "--fasta PATH") { |v| p v }
   parser.on("-h", "--help", "Show this help") do
     puts parser
     exit
   end
+  parser.separator <<-EOS
+  EXPR:
+    name pos start stop mpos isize flag
+    paired proper_pair unmapped mate_unmapped reverse mate_reverse
+    read1 read2 secondary qcfail dup supplementary
+  EOS
   parser.invalid_option do |flag|
     STDERR.puts "ERROR: #{flag} is not a valid option."
     STDERR.puts parser
