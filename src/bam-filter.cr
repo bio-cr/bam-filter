@@ -64,7 +64,7 @@ if input_file == ""
   exit(1)
 end
 
-if File.exists?(input_file)
+unless File.exists?(input_file)
   STDERR.puts "ERROR: #{input_file} not found."
   exit(1)
 end
