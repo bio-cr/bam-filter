@@ -17,7 +17,13 @@ output_file = "-"
 output_format = ""
 
 OptionParser.parse do |parser|
-  parser.banner = "Usage: bam-filter [options] <bam_file>"
+  parser.banner=<<-EOS
+  Program: #{PROGRAM}
+  Version: #{VERSION}
+  Source:  https://github.com/bio-crystal/bam-filter
+  
+  Usage: bam-filter [options] <bam_file>
+  EOS
   parser.on("-t NUM", "--threads NUM") { |v| nthreads = v.to_i }
   parser.on("-o PATH", "--output PATH") { |v| output_file = v }
   parser.on("-S", "--sam", "Output SAM") { output_format = ".sam" }
