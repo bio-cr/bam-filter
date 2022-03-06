@@ -22,7 +22,6 @@ jobs:
                                --pkgversion=$(echo ${{ github.ref }} | sed -e "s#refs/tags/v##g")
                                --maintainer=2xijok@gmail.com
                                --requires=libhts-dev
-                               --pkgarch=${{ matrix.os }}
                                --nodoc -y
       - uses: softprops/action-gh-release@v1
         with:
