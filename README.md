@@ -6,13 +6,17 @@
 
 Crystal implementation of [hts-nim-tools/bam-filter](https://github.com/brentp/hts-nim-tools)
 
-build:
+## Installation
 
-```
+```sh
+git clone https://github.com/bio-crystal/bam-filter
 make
+sudo make install
 ```
 
-usage:
+If you are using Ubuntu, the deb package is available from the [Github release page](https://github.com/bio-crystal/bam-filter/releases).
+
+## Usage
 
 ```
 Usage: bam-filter [options] <bam_file>
@@ -25,4 +29,8 @@ Usage: bam-filter [options] <bam_file>
 ```
 
 * `mapq` `start` `pos` `stop` `name` `mpos` `isize` `flag`
-* `paired` `proper_pair` `unmapped` `mate_unmapped` `reverse` `mate_reverse` `read1` `read2` `secondary` `qcfail` `dup` `supplementary`
+* `paired` `proper_pair` `unmapped` `mate_unmapped` `reverse` `mate_reverse` `read1` `read2` `secondary` `qcfail` `dup` `supplementary`## Dev
+
+## Note
+
+bam-filter was originally created to develop and test htslib.cr.
