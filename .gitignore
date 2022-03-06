@@ -9,6 +9,9 @@ shard.lock
 docs
 bam-filter
 
+# pkg
+*.deb
+
 # C
 
 # Prerequisites
