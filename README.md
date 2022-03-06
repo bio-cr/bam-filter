@@ -29,8 +29,8 @@ Usage: bam-filter [options] <bam_file>
 ```
 
 * `mapq` `start` `pos` `stop` `name` `mpos` `isize` `flag`
-* `paired` `proper_pair` `unmapped` `mate_unmapped` `reverse` `mate_reverse` `read1` `read2` `secondary` `qcfail` `dup` `supplementary`## Dev
+* `paired` `proper_pair` `unmapped` `mate_unmapped` `reverse` `mate_reverse` `read1` `read2` `secondary` `qcfail` `dup` `supplementary`
 
 ## Note
 
-bam-filter was originally created to develop and test htslib.cr.
+bam-filter was originally created to develop and test [htslib.cr](https://github.com/bio-crystal/htslib.cr).
