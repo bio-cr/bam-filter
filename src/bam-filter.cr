@@ -7,7 +7,7 @@ require "./ke"
 require "htslib/hts/bam"
 
 PROGRAM = "bam-filter"
-VERSION = "0.0.1"
+VERSION = "0.0.2"
 
 expr = ""
 debug = false
