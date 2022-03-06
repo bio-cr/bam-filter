@@ -21,7 +21,7 @@ jobs:
       - run: sudo checkinstall --pkgname=bam-filter
                                --pkgversion=$(echo ${{ github.ref }} | sed -e "s#refs/tags/v##g")
                                --maintainer=2xijok@gmail.com
-                               --requires=libhts-dev
+                               --requires=libhts-dev,libevent-dev,libgc-dev,libc6-dev
                                --nodoc -y
       - uses: softprops/action-gh-release@v1
         with:
