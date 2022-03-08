@@ -16,7 +16,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: crystal-lang/install-crystal@v1
       - run: sudo apt -qy install libhts-dev checkinstall
-      - run: shards install --pkgname=bam-filter --version
+      - run: shards install
       - run: make
       - run: sudo checkinstall --pkgname=bam-filter
                                --pkgversion=$(echo ${{ github.ref }} | sed -e "s#refs/tags/v##g")
