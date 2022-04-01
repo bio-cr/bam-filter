@@ -7,5 +7,6 @@ authors:
 dependencies:
   htslib:
     github: bio-crystal/htslib.cr
+    branch: develop
 
 license: MIT
