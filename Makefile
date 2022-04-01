@@ -14,8 +14,12 @@ ${PROGRAM}: src/bam-filter.cr src/kexpr.so
 	${CRYSTAL_BIN} build src/bam-filter.cr --release
 
 clean:
-	rm src/kexpr.so
-	rm ${PROGRAM}
+	${RM} ${PROGRAM}
+	${RM} src/kexpr.so
+
+cleanall: clean
+	${RM} shard.lock
+	${RM} lib
 
 install: build
 	mkdir -p ${PREFIX}/bin
