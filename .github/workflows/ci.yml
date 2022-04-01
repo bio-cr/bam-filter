@@ -17,4 +17,4 @@ jobs:
       - name: Make
         run: make
       - name: Run tests
-        run: crystal spec
+        run: ./test.sh
