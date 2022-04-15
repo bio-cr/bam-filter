@@ -4,10 +4,10 @@
 
 require "option_parser"
 require "./ke"
-require "htslib/hts/bam"
+require "hts/bam"
 
 PROGRAM = "bam-filter"
-VERSION = "0.0.4"
+VERSION = "0.0.5"
 
 expr = ""
 debug = false

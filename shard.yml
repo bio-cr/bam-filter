@@ -1,12 +1,12 @@
 name: bam-filter
-version: 0.0.4
+version: 0.0.5
 
 authors:
   - kojix2 <2xijok@gmail.com>
 
 dependencies:
-  htslib:
-    github: bio-crystal/htslib.cr
+  hts:
+    github: bio-crystal/hts
     branch: develop
 
 license: MIT
