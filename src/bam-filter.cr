@@ -43,7 +43,7 @@ OptionParser.parse do |parser|
          name pos start stop mpos isize flag
          paired proper_pair unmapped mate_unmapped
          reverse mate_reverse read1 read2 secondary
-         qcfail dup supplementary
+         qcfail duplicate supplementary
 
   EOS
   parser.invalid_option do |flag|

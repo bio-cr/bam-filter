@@ -1,6 +1,6 @@
 # bam-filter
 
-[![.github/workflows/ci.yml](https://github.com/kojix2/bam-filter/actions/workflows/ci.yml/badge.svg)](https://github.com/kojix2/bam-filter/actions/workflows/ci.yml)
+[![.github/workflows/ci.yml](https://github.com/bio-cr/bam-filter/actions/workflows/ci.yml/badge.svg)](https://github.com/bio-cr/bam-filter/actions/workflows/ci.yml)
 [![Slack](http://img.shields.io/badge/slack-bio--crystal-purple?labelColor=000000&logo=slack)](https://bio-crystal.slack.com/)
 [![Get invite to BioCrystal](http://img.shields.io/badge/Get_invite_to_BioCrystal-purple?labelColor=000000&logo=slack)](https://join.slack.com/t/bio-crystal/shared_invite/zt-tas46pww-JSEloonmn3Ma5eD2~VeT_g)
 
@@ -9,12 +9,12 @@ Crystal implementation of [hts-nim-tools/bam-filter](https://github.com/brentp/h
 ## Installation
 
 ```sh
-git clone https://github.com/bio-crystal/bam-filter
+git clone https://github.com/bio-cr/bam-filter
 make
 sudo make install
 ```
 
-If you are using Ubuntu, the deb package is available from the [Github release page](https://github.com/bio-crystal/bam-filter/releases).
+If you are using Ubuntu, the deb package is available from the [Github release page](https://github.com/bio-cr/bam-filter/releases).
 
 ## Usage
 
@@ -33,4 +33,4 @@ Usage: bam-filter [options] <bam_file>
 
 ## Note
 
-bam-filter was originally created to develop and test [htslib.cr](https://github.com/bio-crystal/htslib.cr).
+bam-filter was originally created to develop and test [hts.cr](https://github.com/bio-cr/hts.cr).
