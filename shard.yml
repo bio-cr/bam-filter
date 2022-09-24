@@ -6,7 +6,7 @@ authors:
 
 dependencies:
   hts:
-    github: bio-crystal/hts
+    github: bio-cr/hts.cr
     branch: develop
 
 license: MIT

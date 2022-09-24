@@ -94,7 +94,7 @@ bam_out.write_header(bam.header)
 
 FLAG_NAMES = %w[paired proper_pair unmapped mate_unmapped
                 reverse mate_reverse read1 read2
-                secondary qcfail dup supplementary]
+                secondary qcfail duplicate supplementary]
 
 use : Hash(String, Bool)
 {% begin %}
@@ -115,14 +115,14 @@ use = {
 
 bam.each do |r|
   e.clear
-  e.set("mapq",  r.mapping_quality) if use["mapq"]
-  e.set("start", r.start)           if use["start"]
-  e.set("pos",   r.start + 1)       if use["pos"]
-  e.set("stop",  r.stop)            if use["stop"]
-  e.set("name",  r.qname)           if use["name"]
-  e.set("mpos",  r.mate_pos)        if use["mpos"]
-  e.set("isize", r.insert_size)     if use["isize"]
-  e.set("flag",  r.flag.value)      if use["flag"]
+  e.set("mapq",  r.mapq)          if use["mapq"]
+  e.set("start", r.pos)           if use["start"]
+  e.set("pos",   r.pos + 1)       if use["pos"]
+  e.set("stop",  r.endpos)        if use["stop"]
+  e.set("name",  r.qname)         if use["name"]
+  e.set("mpos",  r.mate_pos)      if use["mpos"]
+  e.set("isize", r.insert_size)   if use["isize"]
+  e.set("flag",  r.flag.value)    if use["flag"]
   {% for name in FLAG_NAMES %}
     e.set("{{name.id}}", (r.flag.{{name.id}}? ? 1 : 0)) if use["{{name.id}}"]
   {% end %}
