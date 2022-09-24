@@ -29,7 +29,7 @@ Usage: bam-filter [options] <bam_file>
 ```
 
 * `mapq` `start` `pos` `stop` `name` `mpos` `isize` `flag`
-* `paired` `proper_pair` `unmapped` `mate_unmapped` `reverse` `mate_reverse` `read1` `read2` `secondary` `qcfail` `dup` `supplementary`
+* `paired` `proper_pair` `unmapped` `mate_unmapped` `reverse` `mate_reverse` `read1` `read2` `secondary` `qcfail` `duplicate` `supplementary`
 
 ## Note
 
