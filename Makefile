@@ -10,7 +10,7 @@ src/kexpr.so: src/kexpr.c
 	${SHARDS_BIN} install
 	${CC} -O2 -shared -fPIC -o src/kexpr.so -c src/kexpr.c
 
-${PROGRAM}: src/bam-filter.cr src/kexpr.so
+${PROGRAM}: src/bam-filter.cr src/ke.cr src/kexpr.so
 	${CRYSTAL_BIN} build src/bam-filter.cr --release
 
 clean:
