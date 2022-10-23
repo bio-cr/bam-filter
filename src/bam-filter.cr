@@ -12,18 +12,19 @@ VERSION = "0.0.6"
 expr = ""
 debug = false
 nthreads = 0
+
 input_file = ""
 output_file = "-"
 output_format = ""
 
 OptionParser.parse do |parser|
-  parser.banner=<<-EOS
-  Program: #{PROGRAM}
-  Version: #{VERSION}
-  Source:  https://github.com/bio-crystal/bam-filter
+  parser.banner = <<-EOS
+    Program: #{PROGRAM}
+    Version: #{VERSION}
+    Source:  https://github.com/bio-crystal/bam-filter
   
-  Usage: bam-filter [options] <bam_file>
-  EOS
+    Usage: bam-filter [options] <bam_file>
+    EOS
   parser.on("-t NUM", "--threads NUM") { |v| nthreads = v.to_i }
   parser.on("-o PATH", "--output PATH") { |v| output_file = v }
   parser.on("-S", "--sam", "Output SAM") { output_format = ".sam" }
@@ -92,9 +93,10 @@ mode = (output_format == ".sam" ? "w" : "wb")
 bam_out = HTS::Bam.open(output_file, mode)
 bam_out.write_header(bam.header)
 
-FLAG_NAMES = %w[paired proper_pair unmapped mate_unmapped
-                reverse mate_reverse read1 read2
-                secondary qcfail duplicate supplementary]
+FLAG_NAMES = \
+   %w[paired proper_pair unmapped mate_unmapped
+  reverse mate_reverse read1 read2
+  secondary qcfail duplicate supplementary]
 
 use : Hash(String, Bool)
 {% begin %}
@@ -115,14 +117,14 @@ use = {
 
 bam.each do |r|
   e.clear
-  e.set("mapq",  r.mapq)          if use["mapq"]
-  e.set("start", r.pos)           if use["start"]
-  e.set("pos",   r.pos + 1)       if use["pos"]
-  e.set("stop",  r.endpos)        if use["stop"]
-  e.set("name",  r.qname)         if use["name"]
-  e.set("mpos",  r.mate_pos)      if use["mpos"]
-  e.set("isize", r.insert_size)   if use["isize"]
-  e.set("flag",  r.flag.value)    if use["flag"]
+  e.set("mapq", r.mapq) if use["mapq"]
+  e.set("start", r.pos) if use["start"]
+  e.set("pos", r.pos + 1) if use["pos"]
+  e.set("stop", r.endpos) if use["stop"]
+  e.set("name", r.qname) if use["name"]
+  e.set("mpos", r.mate_pos) if use["mpos"]
+  e.set("isize", r.insert_size) if use["isize"]
+  e.set("flag", r.flag.value) if use["flag"]
   {% for name in FLAG_NAMES %}
     e.set("{{name.id}}", (r.flag.{{name.id}}? ? 1 : 0)) if use["{{name.id}}"]
   {% end %}
@@ -132,4 +134,3 @@ end
 
 bam.close
 bam_out.close
-
