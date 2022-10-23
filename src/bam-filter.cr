@@ -7,7 +7,7 @@ require "./ke"
 require "hts/bam"
 
 PROGRAM    = "bam-filter"
-VERSION    = "0.0.6"
+VERSION    = "0.0.7"
 FLAG_NAMES = \
    %w[paired proper_pair unmapped mate_unmapped
   reverse mate_reverse read1 read2
