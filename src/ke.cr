@@ -27,18 +27,23 @@ class KE
     @err.value
   end
 
-  def set(name : String, v : Int)
+  def set(name : String, v : (Int8 | UInt8 | Int16 | UInt16 | Int32 | UInt32 | Int64| UInt64))
     Kexpr.set_int(@ke, name, v)
     error
   end
 
-  def set(name : String, v : UInt8)
-    Kexpr.set_int(@ke, name, v.as(Int))
+  def set(name : String, v : (Float32 | Float64))
+    Kexpr.set_real(@ke, name, v)
     error
   end
 
   def set(name : String, v : String)
     Kexpr.set_str(@ke, name, v)
+    error
+  end
+
+  def set(name : String, v : Char)
+    Kexpr.set_str(@ke, name, v.to_s)
     error
   end
 end
