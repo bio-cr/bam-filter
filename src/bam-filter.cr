@@ -19,6 +19,7 @@ nthreads = 0
 
 input_file = ""
 output_file = "-"
+input_fasta = ""
 output_format = ""
 
 count = 0
@@ -34,10 +35,11 @@ OptionParser.parse do |parser|
   
     Usage: bam-filter [options] <bam_file>
     EOS
-  parser.on("-t NUM", "--threads NUM") { |v| nthreads = v.to_i }
-  parser.on("-o PATH", "--output PATH") { |v| output_file = v }
+  parser.on("-o", "--output PATH", "Output") { |v| output_file = v }
+  parser.on("-f", "--fasta FASTA", "FASTA") { |v| input_fasta = v }
   parser.on("-S", "--sam", "Output SAM") { output_format = ".sam" }
   parser.on("-b", "--bam", "Output BAM") { output_format = ".bam" }
+  parser.on("-t", "--threads NUM", "Threads") { |v| nthreads = v.to_i }
   # parser.on("-f", "--fasta PATH") { |v| p v }
   parser.on("--debug", "Debug mode") { debug = true }
   parser.on("-h", "--help", "Show this help") do
@@ -48,7 +50,7 @@ OptionParser.parse do |parser|
     puts "#{PROGRAM}  #{VERSION}"
     exit(1)
   end
-  parser.on("-e EXPR", "--expression EXPR", "code") { |v| expr = v }
+  parser.on("-e", "--expression EXPR", "code") { |v| expr = v }
   parser.separator <<-EOS
 
          name pos start stop mpos isize flag
@@ -58,12 +60,18 @@ OptionParser.parse do |parser|
 
   EOS
   parser.invalid_option do |flag|
-    STDERR.puts "ERROR: #{flag} is not a valid option."
+    STDERR.puts "[bam-filter] ERROR: #{flag} is not a valid option."
     STDERR.puts parser
     exit(1)
   end
+  # Show help text if no arguments passed
   if ARGV.empty?
     puts parser
+    exit(1)
+  end
+  parser.missing_option do |flag|
+    STDERR.puts "[bam-filter] ERROR: #Missing option: {flag}"
+    STDERR.puts parser
     exit(1)
   end
 end
@@ -139,7 +147,7 @@ rescue ex : Exception
   exit(1)
 end
 
-bam = HTS::Bam.open(input_file, threads: nthreads)
+bam = HTS::Bam.open(input_file, threads: nthreads, fai: input_fasta)
 mode = (output_format == ".sam" ? "w" : "wb")
 bam_out = HTS::Bam.open(output_file, mode)
 bam_out.write_header(bam.header)
