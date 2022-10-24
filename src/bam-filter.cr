@@ -7,7 +7,7 @@ require "./ke"
 require "hts/bam"
 
 PROGRAM     = "bam-filter"
-VERSION     = "0.0.9"
+VERSION     = "0.1.0"
 FIELD_NAMES = {
   "name"  => "r.qname",
   "flag"  => "r.flag.value",
