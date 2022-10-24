@@ -55,7 +55,7 @@ OptionParser.parse do |parser|
 
     Available values in expression
     Fields:
-           name pos start stop mpos isize flag
+           mapq name pos start stop mpos isize flag
     Flags:
            paired proper_pair unmapped mate_unmapped
            reverse mate_reverse read1 read2 secondary
