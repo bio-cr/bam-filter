@@ -34,7 +34,7 @@ Usage: bam-filter [options] <bam_file>
 
 ### Available values in expression
 
-Fields: `mapq` `name` `pos` `start` `stop` `mpos` `isize` `flag`
+Fields: `name` `flag` `chr` `pos` `start` `stop` `mapq` `mchr` `mpos` `isize`
 
 Flags: `paired` `proper_pair` `unmapped` `mate_unmapped`
        `reverse` `mate_reverse` `read1` `read2` `secondary`
