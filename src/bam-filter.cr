@@ -55,7 +55,7 @@ OptionParser.parse do |parser|
 
     Available values in expression
     Fields:
-           mapq name pos start stop mpos isize flag
+           mapq name chr pos start stop mpos isize flag
     Flags:
            paired proper_pair unmapped mate_unmapped
            reverse mate_reverse read1 read2 secondary
@@ -126,6 +126,7 @@ use = {
   "pos"   => expr.includes?("pos"),
   "stop"  => expr.includes?("stop"),
   "name"  => expr.includes?("name"),
+  "chr"   => expr.includes?("chr"),
   "mpos"  => expr.includes?("mpos"),
   "isize" => expr.includes?("isize"),
   "flag"  => expr.includes?("flag"),
@@ -169,6 +170,7 @@ bam.each do |r|
   e.set("pos", r.pos + 1) if use["pos"]
   e.set("stop", r.endpos) if use["stop"]
   e.set("name", r.qname) if use["name"]
+  e.set("chr", r.chrom) if use["chr"]
   e.set("mpos", r.mate_pos) if use["mpos"]
   e.set("isize", r.insert_size) if use["isize"]
   e.set("flag", r.flag.value) if use["flag"]
