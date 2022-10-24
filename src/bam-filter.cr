@@ -6,8 +6,20 @@ require "option_parser"
 require "./ke"
 require "hts/bam"
 
-PROGRAM    = "bam-filter"
-VERSION    = "0.0.9"
+PROGRAM     = "bam-filter"
+VERSION     = "0.0.9"
+FIELD_NAMES = {
+  "name"  => "r.qname",
+  "flag"  => "r.flag.value",
+  "chr"   => "r.chrom",
+  "pos"   => "r.pos + 1",
+  "start" => "r.pos",
+  "stop"  => "r.endpos",
+  "mapq"  => "r.mapq",
+  "mchr"  => "r.mate_chrom",
+  "mpos"  => "r.mpos + 1",
+  "isize" => "r.isize",
+}
 FLAG_NAMES = \
    %w[paired proper_pair unmapped mate_unmapped
   reverse mate_reverse read1 read2
@@ -55,7 +67,7 @@ OptionParser.parse do |parser|
 
     Available values in expression
     Fields:
-           mapq name chr pos start stop mpos isize flag
+           #{FIELD_NAMES.keys.join(" ")}
     Flags:
            paired proper_pair unmapped mate_unmapped
            reverse mate_reverse read1 read2 secondary
@@ -121,15 +133,9 @@ end
 use : Hash(String, Bool)
 {% begin %}
 use = {
-  "mapq"  => expr.includes?("mapq"),
-  "start" => expr.includes?("start"),
-  "pos"   => expr.includes?("pos"),
-  "stop"  => expr.includes?("stop"),
-  "name"  => expr.includes?("name"),
-  "chr"   => expr.includes?("chr"),
-  "mpos"  => expr.includes?("mpos"),
-  "isize" => expr.includes?("isize"),
-  "flag"  => expr.includes?("flag"),
+  {% for name in FIELD_NAMES.keys %}
+    "{{name.id}}" => expr.includes?("{{name.id}}"),
+  {% end %}
   {% for name in FLAG_NAMES %}
     "{{name.id}}" => expr.includes?("{{name.id}}"),
   {% end %}
@@ -165,15 +171,9 @@ bam_out.write_header(bam.header)
 bam.each do |r|
   e.clear
   # Fields
-  e.set("mapq", r.mapq) if use["mapq"]
-  e.set("start", r.pos) if use["start"]
-  e.set("pos", r.pos + 1) if use["pos"]
-  e.set("stop", r.endpos) if use["stop"]
-  e.set("name", r.qname) if use["name"]
-  e.set("chr", r.chrom) if use["chr"]
-  e.set("mpos", r.mate_pos) if use["mpos"]
-  e.set("isize", r.insert_size) if use["isize"]
-  e.set("flag", r.flag.value) if use["flag"]
+  {% for key, value in FIELD_NAMES %}
+    e.set("{{key.id}}", {{value.id}}) if use["{{key.id}}"]
+  {% end %}
   # Flags
   {% for name in FLAG_NAMES %}
     e.set("{{name.id}}", (r.flag.{{name.id}}? ? 1 : 0)) if use["{{name.id}}"]
