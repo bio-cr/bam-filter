@@ -37,6 +37,9 @@ output_format = ""
 count = 0
 tags = [] of String
 
+# @PG line in the output BAM header
+CL = [Process.executable_path || PROGRAM_NAME].concat(ARGV).join(" ")
+
 # Option Parser
 
 OptionParser.parse do |parser|
@@ -166,7 +169,9 @@ end
 bam = HTS::Bam.open(input_file, threads: nthreads, fai: input_fasta)
 mode = (output_format == ".sam" ? "w" : "wb")
 bam_out = HTS::Bam.open(output_file, mode)
-bam_out.write_header(bam.header)
+hdr = bam.header.clone
+hdr.add_pg(PROGRAM, "VN", VERSION, "CL", CL)
+bam_out.write_header(hdr)
 
 bam.each do |r|
   e.clear
