@@ -21,17 +21,26 @@ sudo make install
 
 ```
 Usage: bam-filter [options] <bam_file>
-    -e EXPR, --expression EXPR       code
-    -o PATH                          --output PATH
+    -e, --expression EXPR            Eval code
+    -o, --output PATH                Write output to FILE [standard output]
+    -f, --fasta FASTA                Reference sequence FASTA FILE [null]
     -S, --sam                        Output SAM
     -b, --bam                        Output BAM
-    -t NUM                           --threads NUM
+    -t, --threads NUM                Number of threads to use [0]
     -h, --help                       Show this help
+    -v, --version                    Show version number
+    --debug                          Debug mode
 ```
 
-* `mapq` `start` `pos` `stop` `name` `mpos` `isize` `flag`
-* `paired` `proper_pair` `unmapped` `mate_unmapped` `reverse` `mate_reverse` `read1` `read2` `secondary` `qcfail` `duplicate` `supplementary`
-* `tag_XX`
+### Available values in expression
+
+Fields: `mapq` `name` `pos` `start` `stop` `mpos` `isize` `flag`
+
+Flags: `paired` `proper_pair` `unmapped` `mate_unmapped`
+       `reverse` `mate_reverse` `read1` `read2` `secondary`
+       `qcfail` `duplicate` `supplementary`
+
+Tags:  `tag_XX` (XX is aux tag)
 
 ## Contributing
 
@@ -39,4 +48,4 @@ Bug fixes and macOS support are welcome.
 
 ## Note
 
-bam-filter was originally created to develop and test [hts.cr](https://github.com/bio-cr/hts.cr).
+bam-filter was originally created to develop and test [HTS.cr](https://github.com/bio-cr/hts.cr).
