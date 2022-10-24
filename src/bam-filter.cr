@@ -40,7 +40,6 @@ OptionParser.parse do |parser|
   parser.on("-S", "--sam", "Output SAM") { output_format = ".sam" }
   parser.on("-b", "--bam", "Output BAM") { output_format = ".bam" }
   parser.on("-t", "--threads NUM", "Threads") { |v| nthreads = v.to_i }
-  # parser.on("-f", "--fasta PATH") { |v| p v }
   parser.on("--debug", "Debug mode") { debug = true }
   parser.on("-h", "--help", "Show this help") do
     puts parser
