@@ -95,14 +95,18 @@ if expr == ""
 end
 
 if output_format == ""
-  if File.extname(output_file) == ".sam"
-    output_format = ".sam"
-  elsif File.extname(output_file) == ".bam"
-    output_format = ".bam"
-  elsif output_file == "-"
-    output_format = ".sam"
+  output_format = \
+     case File.extname(output_file)
+     when ".sam"
+       ".sam"
+     when ".bam"
+       ".bam"
+     when ".cram"
+       ".cram"
+     when "-"
+       ".sam"
   else
-    output_format = ".bam"
+       ".bam"
   end
 end
 
