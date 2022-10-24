@@ -4,7 +4,7 @@
 [![Slack](http://img.shields.io/badge/slack-bio--crystal-purple?labelColor=000000&logo=slack)](https://bio-crystal.slack.com/)
 [![Get invite to BioCrystal](http://img.shields.io/badge/Get_invite_to_BioCrystal-purple?labelColor=000000&logo=slack)](https://join.slack.com/t/bio-crystal/shared_invite/zt-tas46pww-JSEloonmn3Ma5eD2~VeT_g)
 
-Crystal implementation of [hts-nim-tools/bam-filter](https://github.com/brentp/hts-nim-tools)
+[Crystal](https://github.com/crystal-lang/crystal) implementation of [bam-filter](https://github.com/brentp/hts-nim-tools) by Brent Pedersen. 
 
 ## Installation
 
@@ -14,7 +14,8 @@ make
 sudo make install
 ```
 
-If you are using Ubuntu, the deb package is available from the [Github release page](https://github.com/bio-cr/bam-filter/releases).
+* Ubuntu: deb package is available from the [Github release page](https://github.com/bio-cr/bam-filter/releases).
+* Currently only Linux is supported.
 
 ## Usage
 
@@ -31,6 +32,10 @@ Usage: bam-filter [options] <bam_file>
 * `mapq` `start` `pos` `stop` `name` `mpos` `isize` `flag`
 * `paired` `proper_pair` `unmapped` `mate_unmapped` `reverse` `mate_reverse` `read1` `read2` `secondary` `qcfail` `duplicate` `supplementary`
 * `tag_XX`
+
+## Contributing
+
+Bug fixes and macOS support are welcome.
 
 ## Note
 
