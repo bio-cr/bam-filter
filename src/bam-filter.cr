@@ -31,16 +31,17 @@ OptionParser.parse do |parser|
   parser.banner = <<-EOS
     Program: #{PROGRAM}
     Version: #{VERSION}
-    Source:  https://github.com/bio-crystal/bam-filter
+    Source:  https://github.com/bio-cr/bam-filter
   
     Usage: bam-filter [options] <bam_file>
     EOS
-  parser.on("-o", "--output PATH", "Output") { |v| output_file = v }
-  parser.on("-f", "--fasta FASTA", "FASTA") { |v| input_fasta = v }
+  parser.on("-e", "--expression EXPR", "eval code") { |v| expr = v }
+  parser.on("-o", "--output PATH", "Write output to FILE [standard output]") { |v| output_file = v }
+  parser.on("-f", "--fasta FASTA", "Reference sequence FASTA FILE [null]") { |v| input_fasta = v }
   parser.on("-S", "--sam", "Output SAM") { output_format = ".sam" }
   parser.on("-b", "--bam", "Output BAM") { output_format = ".bam" }
-  parser.on("-t", "--threads NUM", "Threads") { |v| nthreads = v.to_i }
-  parser.on("--debug", "Debug mode") { debug = true }
+  # parser.on("-C", "--cram", "Output CRAM (requires -f)") { output_format = ".cram" }
+  parser.on("-t", "--threads NUM", "Number of threads to use [0]") { |v| nthreads = v.to_i }
   parser.on("-h", "--help", "Show this help") do
     puts parser
     exit
@@ -49,28 +50,33 @@ OptionParser.parse do |parser|
     puts "#{PROGRAM}  #{VERSION}"
     exit(1)
   end
-  parser.on("-e", "--expression EXPR", "code") { |v| expr = v }
+  parser.on("--debug", "Debug mode") { debug = true }
   parser.separator <<-EOS
 
-         name pos start stop mpos isize flag
-         paired proper_pair unmapped mate_unmapped
-         reverse mate_reverse read1 read2 secondary
-         qcfail duplicate supplementary
+    Available values in expression
+    Fields:
+           name pos start stop mpos isize flag
+    Flags:
+           paired proper_pair unmapped mate_unmapped
+           reverse mate_reverse read1 read2 secondary
+           qcfail duplicate supplementary
+    Tags:
+           tag_XX (XX is aux tag)
 
-  EOS
-  parser.invalid_option do |flag|
-    STDERR.puts "[bam-filter] ERROR: #{flag} is not a valid option."
-    STDERR.puts parser
-    exit(1)
-  end
+    EOS
   # Show help text if no arguments passed
   if ARGV.empty?
     puts parser
     exit(1)
   end
-  parser.missing_option do |flag|
-    STDERR.puts "[bam-filter] ERROR: #Missing option: {flag}"
+  parser.invalid_option do |flag|
     STDERR.puts parser
+    STDERR.puts "[bam-filter] ERROR: #{flag} is not a valid option."
+    exit(1)
+  end
+  parser.missing_option do |flag|
+    STDERR.puts parser
+    STDERR.puts "[bam-filter] ERROR: #Missing option: #{flag}"
     exit(1)
   end
 end
@@ -105,9 +111,9 @@ if output_format == ""
        ".cram"
      when "-"
        ".sam"
-  else
+     else
        ".bam"
-  end
+     end
 end
 
 # Check the fields to be used before execution.
