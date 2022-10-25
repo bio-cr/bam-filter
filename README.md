@@ -42,6 +42,10 @@ Flags: `paired` `proper_pair` `unmapped` `mate_unmapped`
 
 Tags:  `tag_XX` (XX is aux tag)
 
+## Development
+
+The easiest way to start development is to use [Gitpod](https://www.gitpod.io/). All you need is a browser.
+
 ## Contributing
 
 Bug fixes and macOS support are welcome.
