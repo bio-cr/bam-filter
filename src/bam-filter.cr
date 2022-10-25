@@ -101,7 +101,9 @@ end
 
 input_file = ARGV[0]
 
-unless File.exists?(input_file)
+if input_file == "-"
+  STDERR.puts "[bam-filter] Accepts strings from standard input"
+elsif !File.exists?(input_file)
   STDERR.puts "[bam-filter] ERROR: #{input_file} not found."
   exit(1)
 end
