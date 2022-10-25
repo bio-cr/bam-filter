@@ -30,9 +30,9 @@ debug = false
 nthreads = 0
 
 input_file = ""
-output_file = "-"
+output_file = "-" # standard output
 input_fasta = ""
-output_format = ""
+mode = ""
 
 count = 0
 tags = [] of String
@@ -53,9 +53,9 @@ OptionParser.parse do |parser|
   parser.on("-e", "--expression EXPR", "eval code") { |v| expr = v }
   parser.on("-o", "--output PATH", "Write output to FILE [standard output]") { |v| output_file = v }
   parser.on("-f", "--fasta FASTA", "Reference sequence FASTA FILE [null]") { |v| input_fasta = v }
-  parser.on("-S", "--sam", "Output SAM") { output_format = ".sam" }
-  parser.on("-b", "--bam", "Output BAM") { output_format = ".bam" }
-  # parser.on("-C", "--cram", "Output CRAM (requires -f)") { output_format = ".cram" }
+  parser.on("-S", "--sam", "Output SAM") { mode = "w" }
+  parser.on("-b", "--bam", "Output BAM") { mode = "wb" }
+  # parser.on("-C", "--cram", "Output CRAM (requires -f)") { mode = "wc" }
   parser.on("-t", "--threads NUM", "Number of threads to use [0]") { |v| nthreads = v.to_i }
   parser.on("-h", "--help", "Show this help") do
     puts parser
@@ -110,25 +110,22 @@ unless File.exists?(input_file)
   exit(1)
 end
 
-if expr == ""
+if expr.empty?
   STDERR.puts "[bam-filter] ERROR: no expression specified for -e"
   exit(1)
 end
 
-if output_format == ""
-  output_format = \
-     case File.extname(output_file)
-     when ".sam"
-       ".sam"
-     when ".bam"
-       ".bam"
-     when ".cram"
-       ".cram"
-     when "-"
-       ".sam"
-     else
-       ".bam"
-     end
+if mode.empty?
+  mode = case File.extname(output_file)
+         when ".sam"
+           "w"
+         when ".bam"
+           "wb"
+         when ".cram"
+           "wc"
+         else
+           "wb"
+         end
 end
 
 # Check the fields to be used before execution.
@@ -167,7 +164,6 @@ rescue ex : Exception
 end
 
 bam = HTS::Bam.open(input_file, threads: nthreads, fai: input_fasta)
-mode = (output_format == ".sam" ? "w" : "wb")
 bam_out = HTS::Bam.open(output_file, mode)
 hdr = bam.header.clone
 hdr.add_pg(PROGRAM, "VN", VERSION, "CL", CL)
