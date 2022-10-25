@@ -69,14 +69,10 @@ OptionParser.parse do |parser|
   parser.separator <<-EOS
 
     Available values in expression
-    Fields:
-           #{FIELD_NAMES.keys.join(" ")}
-    Flags:
-           paired proper_pair unmapped mate_unmapped
-           reverse mate_reverse read1 read2 secondary
-           qcfail duplicate supplementary
-    Tags:
-           tag_XX (XX is aux tag)
+    Fields: #{FIELD_NAMES.keys.join(" ")}
+    Flags:  paired proper_pair unmapped mate_unmapped reverse mate_reverse
+            read1 read2 secondary qcfail duplicate supplementary
+    Tags:   tag_XX (XX is aux tag)
 
     EOS
   # Show help text if no arguments passed
