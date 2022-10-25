@@ -19,7 +19,7 @@ clean:
 
 cleanall: clean
 	${RM} shard.lock
-	${RM} lib
+	${RM} -r lib
 
 install: build
 	mkdir -p ${PREFIX}/bin
