@@ -39,6 +39,7 @@ tags = [] of String
 
 # @PG line in the output BAM header
 CL = [Process.executable_path || PROGRAM_NAME].concat(ARGV).join(" ")
+use_pg = true
 
 # Option Parser
 
@@ -57,6 +58,7 @@ OptionParser.parse do |parser|
   parser.on("-b", "--bam", "Output BAM") { mode = "wb" }
   parser.on("-C", "--cram", "Output CRAM (requires -f)") { mode = "wc" }
   parser.on("-t", "--threads NUM", "Number of threads to use [0]") { |v| nthreads = v.to_i }
+  parser.on("--no-PG", "Do not add @PG line to the header") { use_pg = false }
   parser.on("-h", "--help", "Show this help") do
     puts parser
     exit
@@ -164,7 +166,7 @@ end
 bam = HTS::Bam.open(input_file, threads: nthreads, fai: input_fasta)
 bam_out = HTS::Bam.open(output_file, mode)
 hdr = bam.header.clone
-hdr.add_pg(PROGRAM, "VN", VERSION, "CL", CL)
+hdr.add_pg(PROGRAM, "VN", VERSION, "CL", CL) if use_pg
 bam_out.write_header(hdr)
 
 bam.each do |r|
