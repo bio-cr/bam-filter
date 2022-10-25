@@ -55,7 +55,7 @@ OptionParser.parse do |parser|
   parser.on("-f", "--fasta FASTA", "Reference sequence FASTA FILE [null]") { |v| input_fasta = v }
   parser.on("-S", "--sam", "Output SAM") { mode = "w" }
   parser.on("-b", "--bam", "Output BAM") { mode = "wb" }
-  # parser.on("-C", "--cram", "Output CRAM (requires -f)") { mode = "wc" }
+  parser.on("-C", "--cram", "Output CRAM (requires -f)") { mode = "wc" }
   parser.on("-t", "--threads NUM", "Number of threads to use [0]") { |v| nthreads = v.to_i }
   parser.on("-h", "--help", "Show this help") do
     puts parser
