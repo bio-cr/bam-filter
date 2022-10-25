@@ -21,15 +21,16 @@ sudo make install
 
 ```
 Usage: bam-filter [options] <bam_file>
-    -e, --expression EXPR            Eval code
+    -e, --expression EXPR            eval code
     -o, --output PATH                Write output to FILE [standard output]
     -f, --fasta FASTA                Reference sequence FASTA FILE [null]
     -S, --sam                        Output SAM
     -b, --bam                        Output BAM
+    -C, --cram                       Output CRAM (requires -f)
     -t, --threads NUM                Number of threads to use [0]
+    --no-PG                          Do not add @PG line to the header
     -h, --help                       Show this help
     -v, --version                    Show version number
-    --debug                          Debug mode
 ```
 
 ### Available values in expression
