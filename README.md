@@ -15,6 +15,7 @@ sudo make install
 ```
 
 * Ubuntu: deb package is available from the [Github release page](https://github.com/bio-cr/bam-filter/releases).
+  * Please note that installing the bam-filter deb package may uninstall packages that depend on `libcurl4-openssl-dev`, since `libhts-dev` depends on `libcurl4-gnutls-dev`.
 * Currently only Linux is supported.
 
 ## Usage
