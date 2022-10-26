@@ -22,7 +22,7 @@ jobs:
                                --maintainer=2xijok@gmail.com
                                --requires=libhts-dev,libc6,libpcre3,libevent-dev,libgc-dev
                                --nodoc -y
-      - uses: actions/upload-artifact@v2
+      - uses: actions/upload-artifact@v3
         with:
-          name: "bam-filter*.deb"
+          path: "bam-filter*.deb"
 
