@@ -1,9 +1,7 @@
 name: build
 
 on:
-  push:
-    tags:
-      - "v*.*.*"
+  workflow_dispatch:
 
 jobs:
   release:
@@ -11,19 +9,20 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ 'ubuntu-20.04' ]
+        os: ['ubuntu-18.04', 'ubuntu-20.04', 'ubuntu-22.04']
     steps:
       - uses: actions/checkout@v3
       - uses: crystal-lang/install-crystal@v1
       - run: sudo apt -qy install libhts-dev checkinstall
       - run: shards install
       - run: make
+      - run: test.sh
       - run: sudo checkinstall --pkgname=bam-filter
                                --pkgversion=$(echo ${{ github.ref }} | sed -e "s#refs/tags/v##g")
                                --maintainer=2xijok@gmail.com
                                --requires=libhts-dev,libc6,libpcre3,libevent-dev,libgc-dev
                                --nodoc -y
-      - uses: softprops/action-gh-release@v1
+      - uses: actions/upload-artifact@v2
         with:
-          files: "bam-filter*.deb"
+          name: "bam-filter*.deb"
 
