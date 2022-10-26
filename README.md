@@ -18,7 +18,7 @@ sudo make install
 
 * Ubuntu 20.04 and 22.04: deb packages are available from the [Github release page](https://github.com/bio-cr/bam-filter/releases).
   * Please note that installing the bam-filter deb package may uninstall packages that depend on `libcurl4-openssl-dev`, since `libhts-dev` depends on `libcurl4-gnutls-dev`.
-* Currently only Linux is supported.
+* Currently only Linux is supported. Pull requests are welcome.
 
 ## Usage
 
@@ -36,9 +36,13 @@ Usage: bam-filter [options] <bam_file>
     -v, --version                    Show version number
 ```
 
+Example
+
 ```
 bam-filter -S -e "chr=='chr1' && pos > 200 && tag_AS > 35" test/moo.bam
 ```
+
+The given expression is evaluated by [klib/kexpr](https://attractivechaos.github.io/klib/#Kexpr%3A%20parsing%20mathematical%20expressions).
 
 ### Available values in expression
 
