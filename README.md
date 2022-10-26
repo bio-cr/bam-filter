@@ -6,6 +6,8 @@
 
 [Crystal](https://github.com/crystal-lang/crystal) implementation of [bam-filter](https://github.com/brentp/hts-nim-tools) by Brent Pedersen. 
 
+Filter BAM / CRAM / SAM files with a simple expression language. 
+
 ## Installation
 
 ```sh
@@ -32,6 +34,10 @@ Usage: bam-filter [options] <bam_file>
     --no-PG                          Do not add @PG line to the header
     -h, --help                       Show this help
     -v, --version                    Show version number
+```
+
+```
+bam-filter -S -e "chr=='chr1' && pos > 200 && tag_AS > 35" test/moo.bam
 ```
 
 ### Available values in expression
