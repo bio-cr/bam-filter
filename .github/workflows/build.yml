@@ -16,7 +16,7 @@ jobs:
       - run: sudo apt -qy install libhts-dev checkinstall
       - run: shards install
       - run: make
-      - run: test.sh
+      - run: bash test.sh
       - run: sudo checkinstall --pkgname=bam-filter
                                --pkgversion=$(echo ${{ github.ref }} | sed -e "s#refs/tags/v##g")
                                --maintainer=2xijok@gmail.com
