@@ -24,5 +24,6 @@ jobs:
                                --nodoc -y
       - uses: actions/upload-artifact@v3
         with:
+          name: bam-filter-$(echo ${{ github.ref }} | sed -e "s#refs/tags/v##g")_${{ matrix.os }}_amd64.deb
           path: "bam-filter*.deb"
 
