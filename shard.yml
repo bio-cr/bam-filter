@@ -8,5 +8,8 @@ dependencies:
   hts:
     github: bio-cr/hts.cr
     branch: develop
+  anyolite:
+    github: Anyolite/anyolite
+    branch: main
 
 license: MIT

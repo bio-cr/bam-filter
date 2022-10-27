@@ -3,8 +3,9 @@
 # https://github.com/bio-crystal/bam-filter
 
 require "option_parser"
-require "./ke"
+# require "./ke"
 require "hts/bam"
+require "anyolite"
 
 PROGRAM     = "bam-filter"
 VERSION     = "0.1.3"
@@ -156,42 +157,42 @@ end
 
 # Main
 
-begin
-  e = KE.new(expr)
-rescue ex : Exception
-  STDERR.puts "[bam-filter] ERROR: failed to parse expression. #{ex.message}"
-  exit(1)
-end
-
 bam = HTS::Bam.open(input_file, threads: nthreads, fai: input_fasta)
 bam_out = HTS::Bam.open(output_file, mode)
 hdr = bam.header.clone
 hdr.add_pg(PROGRAM, "VN", VERSION, "CL", CL) if use_pg
 bam_out.write_header(hdr)
 
-bam.each do |r|
-  e.clear
-  # Fields
-  {% for key, value in FIELD_NAMES %}
-    e.set("{{key.id}}", {{value.id}}) if use["{{key.id}}"]
-  {% end %}
-  # Flags
-  {% for name in FLAG_NAMES %}
-    e.set("{{name.id}}", (r.flag.{{name.id}}? ? 1 : 0)) if use["{{name.id}}"]
-  {% end %}
-  # Auxiliary data
-  tags.each do |t|
-    v = r.aux(t)
-    e.set("tag_#{t}", v) unless v.nil?
-  end
+Anyolite::RbInterpreter.create do |rb|
+  bam.each do |r|
+    # Fields
+    {% for key, value in FIELD_NAMES %}
+      if use["{{key.id}}"]
+        v = {{value.id}}
+        v = v.is_a?(String) ? "\"#{v}\"" : v # OK?
+        s = "{{key.id}}=#{v}"
+        rb.execute_script_line(s)
+      end
+    {% end %}
+    # Flags
+    {% for name in FLAG_NAMES %}
+      if use["{{name.id}}"]
+        v = r.flag.{{name.id}}?
+        s = "{{name.id}} = #{v}"
+        rb.execute_script_line(s)
+      end
+    {% end %}
+    # Auxiliary data
+    tags.each do |t|
+      v = r.aux(t)
+      rb.execute_script_line("tag_i#{t}=#{v}") if v.nil?
+    end
 
-  # Write
-  if e.bool
-    if e.error_code == 0
+    # Write
+    rb.execute_script_line(expr)
+    if false
       bam_out.write(r)
       count += 1
-    else
-      STDERR.puts "[bam-filter] #{e.eval_error}" if debug
     end
   end
 end
