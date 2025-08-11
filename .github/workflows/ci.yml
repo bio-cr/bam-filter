@@ -14,26 +14,25 @@ jobs:
       matrix:
         os: [ubuntu-20.04, ubuntu-22.04]
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: crystal-lang/install-crystal@v1
       - run: sudo apt -qy install libhts-dev checkinstall
       - run: shards install
       - run: make
       - run: bash test.sh
       - run: sudo checkinstall --pkgname=bam-filter
-                               --pkgversion=$(echo ${{ github.ref }} | sed -e "s#refs/tags/v##g")
-                               --maintainer=2xijok@gmail.com
-                               --requires=libhts-dev,libc6,libpcre3,libevent-dev,libgc-dev
-                               --nodoc -y
+          --pkgversion=$(echo ${{ github.ref }} | sed -e "s#refs/tags/v##g")
+          --maintainer=2xijok@gmail.com
+          --requires=libhts-dev,libc6,libpcre3,libevent-dev,libgc-dev
+          --nodoc -y
       - run: mv bam-filter*.deb bam-filter_${{ matrix.os }}_amd64.deb
-      - uses: actions/upload-artifact@v3
+      - uses: actions/upload-artifact@v4
         with:
           name: bam-filter_${{ matrix.os }}_amd64.deb
           path: bam-filter_${{ matrix.os }}_amd64.deb
-      - uses: softprops/action-gh-release@v1
+      - uses: softprops/action-gh-release@v2
         if: startsWith(github.ref, 'refs/tags/')
         with:
           draft: true
           files: |
             bam-filter_${{ matrix.os }}_amd64.deb
-
