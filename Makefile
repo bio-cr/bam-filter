@@ -4,6 +4,17 @@ SHARDS_BIN ?= shards
 PREFIX ?= /usr/local
 PROGRAM ?= bam-filter
 
+.PHONY: help build clean cleanall install uninstall
+
+help: ## Show this help message
+	@echo "Available targets:"
+	@echo "  build      - Build the ${PROGRAM} binary"
+	@echo "  clean      - Remove built files"
+	@echo "  cleanall   - Remove built files and dependencies"
+	@echo "  install    - Install ${PROGRAM} to ${PREFIX}/bin"
+	@echo "  uninstall  - Remove ${PROGRAM} from ${PREFIX}/bin"
+	@echo "  help       - Show this help message"
+
 build: ${PROGRAM}
 
 src/kexpr.so: src/kexpr.c
