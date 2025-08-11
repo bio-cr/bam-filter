@@ -14,7 +14,7 @@ jobs:
       matrix:
         os: [ubuntu-22.04, ubuntu-24.04]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: crystal-lang/install-crystal@v1
       - run: sudo apt -qy install libhts-dev checkinstall
       - run: shards install
