@@ -48,7 +48,7 @@ OptionParser.parse do |parser|
     Program: #{PROGRAM}
     Version: #{VERSION}
     Source:  https://github.com/bio-cr/bam-filter
-  
+
     Usage: bam-filter [options] <bam_file>
     EOS
   parser.on("-e", "--expression EXPR", "eval code") { |v| expr = v }

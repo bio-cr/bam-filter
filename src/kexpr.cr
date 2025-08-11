@@ -4,8 +4,7 @@ lib Kexpr
   type KexprT = Void*
   fun destroy = ke_destroy(ke : KexprT)
   fun set_int = ke_set_int(ke : KexprT, var : LibC::Char*, x : Int64T) : LibC::Int
-  alias X__Int64T = LibC::Long
-  alias Int64T = X__Int64T
+  alias Int64T = LibC::Long
   fun set_real = ke_set_real(ke : KexprT, var : LibC::Char*, x : LibC::Double) : LibC::Int
   fun set_str = ke_set_str(ke : KexprT, var : LibC::Char*, x : LibC::Char*) : LibC::Int
   fun set_real_func1 = ke_set_real_func1(ke : KexprT, name : LibC::Char*, func : (LibC::Double -> LibC::Double)) : LibC::Int

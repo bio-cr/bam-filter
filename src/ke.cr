@@ -46,7 +46,7 @@ class KE
 
   def parse_error(err = error_code)
     if err == 0
-      return "no error"
+      "no error"
     elsif (err & KEE_UNQU) != 0
       "unmatched quotation marks"
     elsif (err & KEE_UNLP) != 0
@@ -68,7 +68,7 @@ class KE
 
   def eval_error(err = error_code)
     if err == 0
-      return "no error"
+      "no error"
     elsif (err & KEE_UNFUNC) != 0
       "undefined function"
     elsif (err & KEE_UNVAR) != 0
