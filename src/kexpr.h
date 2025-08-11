@@ -7,25 +7,26 @@ struct kexpr_s;
 typedef struct kexpr_s kexpr_t;
 
 // Parse errors
-#define KEE_UNQU    0x01 // unmatched quotation marks
-#define KEE_UNLP    0x02 // unmatched left parentheses
-#define KEE_UNRP    0x04 // unmatched right parentheses
-#define KEE_UNOP    0x08 // unknown operators
-#define KEE_FUNC    0x10 // wrong function syntax
-#define KEE_ARG     0x20
-#define KEE_NUM     0x40 // fail to parse a number
+#define KEE_UNQU 0x01 // unmatched quotation marks
+#define KEE_UNLP 0x02 // unmatched left parentheses
+#define KEE_UNRP 0x04 // unmatched right parentheses
+#define KEE_UNOP 0x08 // unknown operators
+#define KEE_FUNC 0x10 // wrong function syntax
+#define KEE_ARG 0x20
+#define KEE_NUM 0x40 // fail to parse a number
 
 // Evaluation errors
-#define KEE_UNFUNC  0x40 // undefined function
-#define KEE_UNVAR   0x80 // unassigned variable
+#define KEE_UNFUNC 0x40 // undefined function
+#define KEE_UNVAR 0x80	// unassigned variable
 
 // Return type
-#define KEV_REAL  1
-#define KEV_INT   2
-#define KEV_STR   3
+#define KEV_REAL 1
+#define KEV_INT 2
+#define KEV_STR 3
 
 #ifdef __cplusplus
-extern "C" {
+extern "C"
+{
 #endif
 
 	// parse an expression and return errors in $err
