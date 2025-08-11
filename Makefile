@@ -6,6 +6,8 @@ PROGRAM ?= bam-filter
 
 .PHONY: help build clean cleanall install uninstall
 
+all: build
+
 help: ## Show this help message
 	@echo "Available targets:"
 	@echo "  build      - Build the ${PROGRAM} binary"
