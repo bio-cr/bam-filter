@@ -4,9 +4,9 @@
 [![Slack](http://img.shields.io/badge/slack-bio--crystal-purple?labelColor=000000&logo=slack)](https://bio-crystal.slack.com/)
 [![Get invite to BioCrystal](http://img.shields.io/badge/Get_invite_to_BioCrystal-purple?labelColor=000000&logo=slack)](https://join.slack.com/t/bio-crystal/shared_invite/zt-tas46pww-JSEloonmn3Ma5eD2~VeT_g)
 
-[Crystal](https://github.com/crystal-lang/crystal) implementation of [bam-filter](https://github.com/brentp/hts-nim-tools) by Brent Pedersen. 
+[Crystal](https://github.com/crystal-lang/crystal) implementation of [bam-filter](https://github.com/brentp/hts-nim-tools) by Brent Pedersen.
 
-Filter BAM / CRAM / SAM files with a simple expression language. 
+Filter BAM / CRAM / SAM files with a simple expression language.
 
 ## Installation
 
@@ -16,9 +16,9 @@ make
 sudo make install
 ```
 
-* Ubuntu 20.04 and 22.04: deb packages are available from the [Github release page](https://github.com/bio-cr/bam-filter/releases).
-  * Please note that installing the bam-filter deb package may uninstall packages that depend on `libcurl4-openssl-dev`, since `libhts-dev` depends on `libcurl4-gnutls-dev`.
-* Currently only Linux is supported. Pull requests are welcome.
+- Ubuntu 20.04 and 22.04: deb packages are available from the [Github release page](https://github.com/bio-cr/bam-filter/releases).
+  - Please note that installing the bam-filter deb package may uninstall packages that depend on `libcurl4-openssl-dev`, since `libhts-dev` depends on `libcurl4-gnutls-dev`.
+- Currently only Linux is supported. Pull requests are welcome.
 
 ## Usage
 
@@ -49,10 +49,10 @@ The given expression is evaluated by [klib/kexpr](https://attractivechaos.github
 Fields: `name` `flag` `chr` `pos` `start` `stop` `mapq` `mchr` `mpos` `isize`
 
 Flags: `paired` `proper_pair` `unmapped` `mate_unmapped`
-       `reverse` `mate_reverse` `read1` `read2` `secondary`
-       `qcfail` `duplicate` `supplementary`
+`reverse` `mate_reverse` `read1` `read2` `secondary`
+`qcfail` `duplicate` `supplementary`
 
-Tags:  `tag_XX` (XX is aux tag)
+Tags: `tag_XX` (XX is aux tag)
 
 ## Development
 
