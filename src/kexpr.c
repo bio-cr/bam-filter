@@ -269,7 +269,7 @@ static ke1_t *ke_parse_core(const char *_s, int *_n, int *err)
 	while (*p) {
 		if (*p == '(') {
 			t = push_back(&op, &n_op, &m_op); // push to the operator stack
-			t->op = -1, t->ttype = KET_NULL; // ->op < 0 for a left parenthsis
+			t->op = -1, t->ttype = KET_NULL; // ->op < 0 for a left parenthesis
 			++p;
 		} else if (*p == ')') {
 			while (n_op > 0 && op[n_op-1].op >= 0) { // move operators to the output until we see a left parenthesis
