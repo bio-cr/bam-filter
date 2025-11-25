@@ -1,30 +1,21 @@
-name: build
+name: CI
 
 on:
   push:
-    branches: ["*"]
-    tags: ["v*"]
   pull_request:
-  schedule:
-    - cron: "51 3 * * 6" # Runs at 03:51, only on Saturday
+  workflow_dispatch:
 
 jobs:
-  build:
-    name: build ${{ matrix.target }}
+  test:
+    name: Test on ${{ matrix.os }}
     strategy:
       fail-fast: false
       matrix:
-        include:
-          - os: ubuntu-20.04
-            target: ubuntu-20.04
-          - os: ubuntu-22.04
-            target: ubuntu-22.04
-          - os: ubuntu-24.04
-            target: ubuntu-24.04
+        os: [ubuntu-latest, macos-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v6
+        uses: actions/checkout@v4
         with:
           submodules: true
 
@@ -33,47 +24,19 @@ jobs:
         with:
           crystal: latest
 
-      - name: Set version variables
-        shell: bash
-        run: |
-          if [[ "${{ github.ref }}" == refs/tags/* ]]; then
-            VERSION=${{ github.ref_name }}
-          else
-            VERSION="build-$(date +%Y%m%d-%H%M%S)"
-          fi
-          echo "VERSION=$VERSION" >> $GITHUB_ENV
-          echo "BIN=bam-filter" >> $GITHUB_ENV
+      - name: Install dependencies (Ubuntu)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libhts-dev
 
-      - name: Install dependencies
-        run: |
-          sudo apt -qy install libhts-dev checkinstall
-          shards install
+      - name: Install dependencies (macOS)
+        if: runner.os == 'macOS'
+        run: brew install htslib
+
+      - name: Install shards
+        run: shards install
 
       - name: Build
         run: make
 
       - name: Run tests
         run: bash test.sh
-
-      - name: Create deb package
-        run: |
-          sudo checkinstall --pkgname=bam-filter \
-            --pkgversion=${VERSION#v} \
-            --maintainer=2xijok@gmail.com \
-            --requires=libhts-dev,libc6,libpcre3,libevent-dev,libgc-dev \
-            --nodoc -y
-          mv bam-filter*.deb bam-filter-${VERSION}-${{ matrix.target }}-amd64.deb
-
-      - name: Upload artifacts (non-release)
-        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
-        uses: actions/upload-artifact@v5
-        with:
-          name: bam-filter-${{ matrix.target }}-amd64
-          path: bam-filter-*-${{ matrix.target }}-amd64.deb
-
-      - name: Upload release assets (release only)
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v2
-        with:
-          files: |
-            bam-filter-*-${{ matrix.target }}-amd64.deb
