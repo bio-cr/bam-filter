@@ -57,6 +57,7 @@ bam-filter
 *.su
 *.idb
 *.pdb
+*.dwarf
 
 # Kernel Module Compile Results
 *.mod*
