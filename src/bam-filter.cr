@@ -51,6 +51,7 @@ OptionParser.parse do |parser|
 
     Usage: bam-filter [options] <bam_file>
     EOS
+  parser.summary_width = 22
   parser.on("-e", "--expression EXPR", "eval code") { |v| expr = v }
   parser.on("-o", "--output PATH", "Write output to FILE [standard output]") { |v| output_file = v }
   parser.on("-f", "--fasta FASTA", "Reference sequence FASTA FILE [null]") { |v| input_fasta = v }
