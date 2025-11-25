@@ -1,8 +1,4 @@
-{% if flag?(:darwin) %}
-  @[Link(ldflags: "-L #{__DIR__} -lkexpr")]
-{% else %}
-  @[Link(ldflags: "-L #{__DIR__} -l:kexpr.so")]
-{% end %}
+@[Link(ldflags: "#{__DIR__}/libkexpr.a")]
 lib Kexpr
   fun parse = ke_parse(_s : LibC::Char*, err : LibC::Int*) : KexprT
   type KexprT = Void*

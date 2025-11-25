@@ -4,18 +4,7 @@ SHARDS_BIN ?= shards
 PREFIX ?= /usr/local
 PROGRAM ?= bam-filter
 CC ?= cc
-
-# Detect OS for shared library extension
-UNAME_S := $(shell uname -s)
-ifeq ($(UNAME_S),Darwin)
-    SHARED_EXT = dylib
-    SHARED_FLAGS = -dynamiclib
-    LIB_NAME = libkexpr.dylib
-else
-    SHARED_EXT = so
-    SHARED_FLAGS = -shared
-    LIB_NAME = kexpr.so
-endif
+AR ?= ar
 
 .PHONY: help build clean cleanall install uninstall
 
@@ -32,16 +21,17 @@ help: ## Show this help message
 
 build: ${PROGRAM}
 
-src/${LIB_NAME}: src/kexpr.c
+src/libkexpr.a: src/kexpr.c
 	${SHARDS_BIN} install
-	${CC} -O2 ${SHARED_FLAGS} -fPIC -o src/${LIB_NAME} src/kexpr.c
+	${CC} -O2 -c -o src/kexpr.o src/kexpr.c
+	${AR} rcs src/libkexpr.a src/kexpr.o
 
-${PROGRAM}: src/bam-filter.cr src/ke.cr src/${LIB_NAME}
+${PROGRAM}: src/bam-filter.cr src/ke.cr src/libkexpr.a
 	${CRYSTAL_BIN} build src/bam-filter.cr --release
 
 clean:
 	${RM} ${PROGRAM}
-	${RM} src/kexpr.so src/kexpr.dylib src/libkexpr.dylib
+	${RM} src/kexpr.o src/libkexpr.a
 
 cleanall: clean
 	${RM} shard.lock
