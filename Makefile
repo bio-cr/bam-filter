@@ -6,13 +6,14 @@ PROGRAM ?= bam-filter
 CC ?= cc
 AR ?= ar
 
-.PHONY: help build clean cleanall install uninstall
+.PHONY: help build test clean cleanall install uninstall
 
 all: build
 
 help: ## Show this help message
 	@echo "Available targets:"
 	@echo "  build      - Build the ${PROGRAM} binary"
+	@echo "  test       - Run smoke tests"
 	@echo "  clean      - Remove built files"
 	@echo "  cleanall   - Remove built files and dependencies"
 	@echo "  install    - Install ${PROGRAM} to ${PREFIX}/bin"
@@ -21,13 +22,16 @@ help: ## Show this help message
 
 build: ${PROGRAM}
 
-src/libkexpr.a: src/kexpr.c
+src/libkexpr.a: src/kexpr.c src/kexpr.h
 	${SHARDS_BIN} install
 	${CC} -O2 -c -o src/kexpr.o src/kexpr.c
 	${AR} rcs src/libkexpr.a src/kexpr.o
 
-${PROGRAM}: src/bam-filter.cr src/ke.cr src/libkexpr.a
+${PROGRAM}: src/bam-filter.cr src/ke.cr src/kexpr.cr src/libkexpr.a
 	${CRYSTAL_BIN} build src/bam-filter.cr --release
+
+test: build
+	./test.sh
 
 clean:
 	${RM} ${PROGRAM}

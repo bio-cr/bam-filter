@@ -3,6 +3,7 @@
 # https://github.com/bio-crystal/bam-filter
 
 require "option_parser"
+require "set"
 require "./ke"
 require "hts/bam"
 
@@ -24,6 +25,15 @@ FLAG_NAMES = \
    %w[paired proper_pair unmapped mate_unmapped
   reverse mate_reverse read1 read2
   secondary qcfail duplicate supplementary]
+
+def parse_non_negative_int(value : String, option : String) : Int32
+  num = value.to_i?
+  if num.nil? || num < 0
+    STDERR.puts "[bam-filter] ERROR: #{option} must be a non-negative integer."
+    exit(1)
+  end
+  num
+end
 
 expr = ""
 debug = false
@@ -58,7 +68,7 @@ OptionParser.parse do |parser|
   parser.on("-S", "--sam", "Output SAM") { mode = "w" }
   parser.on("-b", "--bam", "Output BAM") { mode = "wb" }
   parser.on("-C", "--cram", "Output CRAM (requires -f)") { mode = "wc" }
-  parser.on("-t", "--threads NUM", "Number of threads to use [0]") { |v| nthreads = v.to_i }
+  parser.on("-t", "--threads NUM", "Number of threads to use [0]") { |v| nthreads = parse_non_negative_int(v, "--threads") }
   parser.on("--no-PG", "Do not add @PG line to the header") { use_pg = false }
   parser.on("-h", "--help", "Show this help") do
     puts parser
@@ -66,7 +76,7 @@ OptionParser.parse do |parser|
   end
   parser.on("-v", "--version", "Show version number") do
     puts "#{PROGRAM}  #{VERSION}"
-    exit(1)
+    exit
   end
   parser.on("--debug", "Debug mode") { debug = true }
   parser.separator <<-EOS
@@ -90,7 +100,7 @@ OptionParser.parse do |parser|
   end
   parser.missing_option do |flag|
     STDERR.puts parser
-    STDERR.puts "[bam-filter] ERROR: #Missing option: #{flag}"
+    STDERR.puts "[bam-filter] ERROR: Missing option: #{flag}"
     exit(1)
   end
 end
@@ -103,6 +113,11 @@ if ARGV.empty?
 end
 
 input_file = ARGV[0]
+
+if ARGV.size > 1
+  STDERR.puts "[bam-filter] ERROR: too many input files specified."
+  exit(1)
+end
 
 if input_file == "-"
   STDERR.puts "[bam-filter] Accepts strings from standard input"
@@ -129,28 +144,40 @@ if mode.empty?
          end
 end
 
+if mode == "wc" && input_fasta.empty?
+  STDERR.puts "[bam-filter] ERROR: CRAM output requires -f/--fasta."
+  exit(1)
+end
+
 # Check the fields to be used before execution.
+
+identifiers = Set(String).new
+expr.scan(/[A-Za-z_][A-Za-z0-9_]*/) do |md|
+  identifiers << md[0]
+end
 
 use : Hash(String, Bool)
 {% begin %}
 use = {
   {% for name in FIELD_NAMES.keys %}
-    "{{name.id}}" => expr.includes?("{{name.id}}"),
+    "{{name.id}}" => identifiers.includes?("{{name.id}}"),
   {% end %}
   {% for name in FLAG_NAMES %}
-    "{{name.id}}" => expr.includes?("{{name.id}}"),
+    "{{name.id}}" => identifiers.includes?("{{name.id}}"),
   {% end %}
 }
 {% end %}
 
 # Check the tags to be used before execution.
 
-expr.scan(/(?<=tag_)[A-Za-z0-9]+/).each do |md|
-  t = md[0]
-  if t.size == 2
-    tags << t
+identifiers.each do |identifier|
+  next unless identifier.starts_with?("tag_")
+
+  tag = identifier.lchop("tag_")
+  if tag.size == 2 && tag.matches?(/^[A-Za-z0-9]{2}$/)
+    tags << tag
   else
-    STDERR.puts "[bam-filter] ERROR: Incorrect tag name. #{t}"
+    STDERR.puts "[bam-filter] ERROR: Incorrect tag name. #{identifier}"
     exit(1)
   end
 end
@@ -165,7 +192,7 @@ rescue ex : Exception
 end
 
 bam = HTS::Bam.open(input_file, threads: nthreads, fai: input_fasta)
-bam_out = HTS::Bam.open(output_file, mode)
+bam_out = HTS::Bam.open(output_file, mode, threads: nthreads, fai: input_fasta)
 hdr = bam.header.clone
 hdr.add_pg(PROGRAM, "VN", VERSION, "CL", CL) if use_pg
 bam_out.write_header(hdr)
