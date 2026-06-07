@@ -11,7 +11,6 @@ permissions:
 env:
   BIN: bam-filter
   PKG_NAME: bam-filter
-  HTSLIB_VERSION: "1.23.1"
 
 jobs:
   linux-static:
@@ -43,6 +42,7 @@ jobs:
             libtool \
             make \
             pkgconf \
+            python3 \
             xz-dev \
             xz-static \
             zlib-dev \
@@ -62,6 +62,12 @@ jobs:
           fi
           echo "VERSION=${VERSION}" >> "${GITHUB_ENV}"
           echo "TARGET=x86_64-unknown-linux-musl" >> "${GITHUB_ENV}"
+
+      - name: Set htslib version
+        shell: bash
+        run: |
+          HTSLIB_VERSION="$(curl -fsSL https://api.github.com/repos/samtools/htslib/releases/latest | python3 -c 'import json, sys; print(json.load(sys.stdin)["tag_name"])')"
+          echo "HTSLIB_VERSION=${HTSLIB_VERSION}" >> "${GITHUB_ENV}"
 
       - name: Build static htslib
         shell: bash
@@ -124,6 +130,126 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: bam-filter-x86_64-linux-musl
+          path: bam-filter-*.tar.gz
+
+      - name: Upload release assets
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: bam-filter-*.tar.gz
+
+  macos-portable:
+    name: build aarch64-apple-darwin portable
+    runs-on: macos-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          submodules: true
+
+      - name: Install Crystal
+        uses: crystal-lang/install-crystal@v1
+        with:
+          crystal: latest
+
+      - name: Install build dependencies
+        run: |
+          brew update
+          brew install autoconf automake libtool pkg-config libgc pcre2
+
+      - name: Set version variables
+        shell: bash
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            VERSION="${GITHUB_REF_NAME}"
+            echo "CRYSTAL_RELEASE_FLAGS=--no-debug" >> "${GITHUB_ENV}"
+            echo "STRIP_RELEASE=true" >> "${GITHUB_ENV}"
+          else
+            VERSION="build-$(date +%Y%m%d-%H%M%S)"
+            echo "CRYSTAL_RELEASE_FLAGS=" >> "${GITHUB_ENV}"
+            echo "STRIP_RELEASE=false" >> "${GITHUB_ENV}"
+          fi
+          echo "VERSION=${VERSION}" >> "${GITHUB_ENV}"
+          echo "TARGET=aarch64-apple-darwin" >> "${GITHUB_ENV}"
+
+      - name: Set htslib version
+        shell: bash
+        run: |
+          HTSLIB_VERSION="$(curl -fsSL https://api.github.com/repos/samtools/htslib/releases/latest | python3 -c 'import json, sys; print(json.load(sys.stdin)["tag_name"])')"
+          echo "HTSLIB_VERSION=${HTSLIB_VERSION}" >> "${GITHUB_ENV}"
+
+      - name: Build static htslib
+        shell: bash
+        run: |
+          curl -fsSL "https://github.com/samtools/htslib/releases/download/${HTSLIB_VERSION}/htslib-${HTSLIB_VERSION}.tar.bz2" -o htslib.tar.bz2
+          tar xjf htslib.tar.bz2
+          cd "htslib-${HTSLIB_VERSION}"
+          autoheader
+          autoconf
+          ./configure \
+            --prefix="${GITHUB_WORKSPACE}/vendor/htslib" \
+            --disable-shared \
+            --enable-static \
+            --disable-bz2 \
+            --disable-lzma \
+            --disable-libdeflate \
+            --disable-libcurl \
+            --disable-plugins
+          make -j"$(sysctl -n hw.ncpu)"
+          make install
+
+      - name: Install shards
+        run: shards install --without-development
+
+      - name: Build portable binary
+        shell: bash
+        run: |
+          mkdir -p bin
+          make src/libkexpr.a
+
+          HTSLIB_PC="${GITHUB_WORKSPACE}/vendor/htslib/lib/pkgconfig"
+          STATIC_LIBS="$(PKG_CONFIG_PATH="${HTSLIB_PC}" pkg-config --static --libs htslib)"
+          STATIC_LIBS="${STATIC_LIBS} $(brew --prefix libgc)/lib/libgc.a"
+          STATIC_LIBS="${STATIC_LIBS} $(brew --prefix pcre2)/lib/libpcre2-8.a"
+
+          crystal build src/bam-filter.cr \
+            --release \
+            ${CRYSTAL_RELEASE_FLAGS} \
+            --link-flags="${STATIC_LIBS}" \
+            -o "bin/${BIN}"
+          chmod +x "bin/${BIN}"
+          if [[ "${STRIP_RELEASE}" == true ]]; then
+            strip "bin/${BIN}"
+          fi
+
+      - name: Verify binary
+        shell: bash
+        run: |
+          file "bin/${BIN}"
+          otool -L "bin/${BIN}"
+          if otool -L "bin/${BIN}" | grep -E '/opt/homebrew|/usr/local/Cellar'; then
+            echo "Error: Homebrew dynamic dependency detected"
+            exit 1
+          fi
+          "bin/${BIN}" --version
+          "bin/${BIN}" -e1 -o /tmp/from-bam.bam test/moo.bam
+          test -s /tmp/from-bam.bam
+          "bin/${BIN}" -C -f test/moo.fa -e1 -o /tmp/from-bam.cram test/moo.bam
+          test -s /tmp/from-bam.cram
+
+      - name: Package
+        shell: bash
+        run: |
+          PKG="${PKG_NAME}-${VERSION}-${TARGET}"
+          mkdir -p "${PKG}"
+          cp "bin/${BIN}" "${PKG}/"
+          cp LICENSE README.md "${PKG}/"
+          tar czf "${PKG}.tar.gz" "${PKG}"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: bam-filter-aarch64-apple-darwin
           path: bam-filter-*.tar.gz
 
       - name: Upload release assets
