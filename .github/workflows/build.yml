@@ -1,0 +1,133 @@
+name: build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  BIN: bam-filter
+  PKG_NAME: bam-filter
+  HTSLIB_VERSION: "1.23.1"
+
+jobs:
+  linux-static:
+    name: build x86_64-linux-musl static
+    runs-on: ubuntu-latest
+    container:
+      image: crystallang/crystal:latest-alpine
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          submodules: true
+
+      - name: Install build dependencies
+        run: |
+          apk add --no-cache \
+            autoconf \
+            automake \
+            binutils \
+            bash \
+            bzip2 \
+            bzip2-dev \
+            bzip2-static \
+            ca-certificates \
+            curl \
+            file \
+            libdeflate-dev \
+            libdeflate-static \
+            libtool \
+            make \
+            pkgconf \
+            xz-dev \
+            xz-static \
+            zlib-dev \
+            zlib-static
+
+      - name: Set version variables
+        shell: bash
+        run: |
+          if [[ "${GITHUB_REF}" == refs/tags/* ]]; then
+            VERSION="${GITHUB_REF_NAME}"
+            echo "CRYSTAL_RELEASE_FLAGS=--no-debug" >> "${GITHUB_ENV}"
+            echo "STRIP_RELEASE=true" >> "${GITHUB_ENV}"
+          else
+            VERSION="build-$(date +%Y%m%d-%H%M%S)"
+            echo "CRYSTAL_RELEASE_FLAGS=" >> "${GITHUB_ENV}"
+            echo "STRIP_RELEASE=false" >> "${GITHUB_ENV}"
+          fi
+          echo "VERSION=${VERSION}" >> "${GITHUB_ENV}"
+          echo "TARGET=x86_64-unknown-linux-musl" >> "${GITHUB_ENV}"
+
+      - name: Build static htslib
+        shell: bash
+        run: |
+          curl -fsSL "https://github.com/samtools/htslib/releases/download/${HTSLIB_VERSION}/htslib-${HTSLIB_VERSION}.tar.bz2" -o htslib.tar.bz2
+          tar xjf htslib.tar.bz2
+          cd "htslib-${HTSLIB_VERSION}"
+          autoheader
+          autoconf
+          ./configure \
+            --prefix=/usr/local \
+            --disable-shared \
+            --enable-static \
+            --disable-libcurl \
+            --disable-plugins
+          make -j"$(nproc)"
+          make install
+
+      - name: Install shards
+        run: shards install --without-development
+
+      - name: Build static binary
+        shell: bash
+        run: |
+          mkdir -p bin
+          make src/libkexpr.a
+          STATIC_LIBS="$(pkg-config --static --libs htslib)"
+          crystal build src/bam-filter.cr \
+            --release \
+            --static \
+            ${CRYSTAL_RELEASE_FLAGS} \
+            --link-flags="${STATIC_LIBS}" \
+            -o "bin/${BIN}"
+          chmod +x "bin/${BIN}"
+          if [[ "${STRIP_RELEASE}" == true ]]; then
+            strip "bin/${BIN}"
+          fi
+
+      - name: Verify binary
+        shell: bash
+        run: |
+          file "bin/${BIN}"
+          ldd "bin/${BIN}" || echo "Static binary: no dynamic dependencies"
+          "bin/${BIN}" --version
+          "bin/${BIN}" -e1 -o /tmp/from-bam.bam test/moo.bam
+          test -s /tmp/from-bam.bam
+          "bin/${BIN}" -C -f test/moo.fa -e1 -o /tmp/from-bam.cram test/moo.bam
+          test -s /tmp/from-bam.cram
+
+      - name: Package
+        shell: bash
+        run: |
+          PKG="${PKG_NAME}-${VERSION}-${TARGET}"
+          mkdir -p "${PKG}"
+          cp "bin/${BIN}" "${PKG}/"
+          cp LICENSE README.md "${PKG}/"
+          tar czf "${PKG}.tar.gz" "${PKG}"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: bam-filter-x86_64-linux-musl
+          path: bam-filter-*.tar.gz
+
+      - name: Upload release assets
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: bam-filter-*.tar.gz
