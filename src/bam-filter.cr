@@ -10,16 +10,16 @@ require "hts/bam"
 PROGRAM     = "bam-filter"
 VERSION     = {{ `shards version #{__DIR__}`.chomp.stringify }}
 FIELD_NAMES = {
-  "name"  => "r.qname",
-  "flag"  => "r.flag.value",
-  "chr"   => "r.chrom",
-  "pos"   => "r.pos + 1",
-  "start" => "r.pos",
-  "stop"  => "r.endpos",
-  "mapq"  => "r.mapq",
-  "mchr"  => "r.mate_chrom",
-  "mpos"  => "r.mpos + 1",
-  "isize" => "r.isize",
+  "name"  => "record.qname",
+  "flag"  => "record.flag.value",
+  "chr"   => "record.chrom",
+  "pos"   => "record.pos + 1",
+  "start" => "record.pos",
+  "stop"  => "record.endpos",
+  "mapq"  => "record.mapq",
+  "mchr"  => "record.mate_chrom",
+  "mpos"  => "record.mpos + 1",
+  "isize" => "record.isize",
 }
 FLAG_NAMES = \
    %w[paired proper_pair unmapped mate_unmapped
@@ -152,18 +152,18 @@ end
 # Check the fields to be used before execution.
 
 identifiers = Set(String).new
-expr.scan(/[A-Za-z_][A-Za-z0-9_]*/) do |md|
-  identifiers << md[0]
+expr.scan(/[A-Za-z_][A-Za-z0-9_]*/) do |match|
+  identifiers << match[0]
 end
 
 use : Hash(String, Bool)
 {% begin %}
 use = {
   {% for name in FIELD_NAMES.keys %}
-    "{{name.id}}" => identifiers.includes?("{{name.id}}"),
+    "{{ name.id }}" => identifiers.includes?("{{ name.id }}"),
   {% end %}
   {% for name in FLAG_NAMES %}
-    "{{name.id}}" => identifiers.includes?("{{name.id}}"),
+    "{{ name.id }}" => identifiers.includes?("{{ name.id }}"),
   {% end %}
 }
 {% end %}
@@ -197,26 +197,26 @@ hdr = bam.header.clone
 hdr.add_pg(PROGRAM, "VN", VERSION, "CL", CL) if use_pg
 bam_out.write_header(hdr)
 
-bam.each do |r|
+bam.each do |record|
   e.clear
   # Fields
   {% for key, value in FIELD_NAMES %}
-    e.set("{{key.id}}", {{value.id}}) if use["{{key.id}}"]
+    e.set("{{ key.id }}", {{ value.id }}) if use["{{ key.id }}"]
   {% end %}
   # Flags
   {% for name in FLAG_NAMES %}
-    e.set("{{name.id}}", (r.flag.{{name.id}}? ? 1 : 0)) if use["{{name.id}}"]
+    e.set("{{ name.id }}", (record.flag.{{ name.id }}? ? 1 : 0)) if use["{{ name.id }}"]
   {% end %}
   # Auxiliary data
-  tags.each do |t|
-    v = r.aux(t)
-    e.set("tag_#{t}", v) unless v.nil?
+  tags.each do |tag_name|
+    value = record.aux(tag_name)
+    e.set("tag_#{tag_name}", value) unless value.nil?
   end
 
   # Write
   if e.bool
     if e.error_code == 0
-      bam_out.write(r)
+      bam_out.write(record)
       count += 1
     else
       STDERR.puts "[bam-filter] #{e.eval_error}" if debug
