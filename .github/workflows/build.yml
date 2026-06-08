@@ -225,6 +225,7 @@ jobs:
 
           HTSLIB_LIBDIR="${GITHUB_WORKSPACE}/vendor/htslib/lib"
           STATIC_LIBS="-L${HTSLIB_LIBDIR} ${HTSLIB_LIBDIR}/libhts.a"
+          STATIC_LIBS="${STATIC_LIBS} -lz"
           STATIC_LIBS="${STATIC_LIBS} $(brew --prefix libgc)/lib/libgc.a"
           STATIC_LIBS="${STATIC_LIBS} $(brew --prefix pcre2)/lib/libpcre2-8.a"
 
