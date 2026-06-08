@@ -13,6 +13,10 @@ with embedded [mruby](https://github.com/mruby/mruby) via
 
 ## Installation
 
+Download the binary from the [GitHub Release](https://github.com/bio-cr/bam-filter/releases).
+
+From source:
+
 ```sh
 git clone https://github.com/bio-cr/bam-filter
 cd bam-filter
