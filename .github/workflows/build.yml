@@ -212,6 +212,7 @@ jobs:
           make -j"$(sysctl -n hw.ncpu)"
           make install
           test -f "${GITHUB_WORKSPACE}/vendor/htslib/lib/libhts.a"
+          rm -f "${GITHUB_WORKSPACE}/vendor/htslib/lib"/libhts*.dylib
 
       - name: Install shards
         run: shards install --without-development
@@ -222,15 +223,12 @@ jobs:
           mkdir -p bin
           make src/libkexpr.a
 
-          HTSLIB_PC="${GITHUB_WORKSPACE}/vendor/htslib/lib/pkgconfig"
-          HTSLIB_A="${GITHUB_WORKSPACE}/vendor/htslib/lib/libhts.a"
-          STATIC_LIBS="$(PKG_CONFIG_PATH="${HTSLIB_PC}" pkg-config --static --libs htslib)"
-          STATIC_LIBS="${STATIC_LIBS//-lhts/}"
-          STATIC_LIBS="${HTSLIB_A} ${STATIC_LIBS}"
+          HTSLIB_LIBDIR="${GITHUB_WORKSPACE}/vendor/htslib/lib"
+          STATIC_LIBS="-L${HTSLIB_LIBDIR} ${HTSLIB_LIBDIR}/libhts.a"
           STATIC_LIBS="${STATIC_LIBS} $(brew --prefix libgc)/lib/libgc.a"
           STATIC_LIBS="${STATIC_LIBS} $(brew --prefix pcre2)/lib/libpcre2-8.a"
 
-          crystal build src/bam-filter.cr \
+          PKG_CONFIG_PATH="" crystal build src/bam-filter.cr \
             --release \
             ${CRYSTAL_RELEASE_FLAGS} \
             --link-flags="${STATIC_LIBS}" \
