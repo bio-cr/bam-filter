@@ -34,6 +34,7 @@ class KE
 
   def clear
     @error_code = 0
+    @last_error = nil
     @values.fill(nil)
     clear_ruby_error
   end
@@ -115,6 +116,7 @@ class KE
       @error_code = 1
       @last_error = error
       clear_ruby_error
+      @rb.close
       raise parse_error
     end
     Anyolite::RbRef.new(result)
