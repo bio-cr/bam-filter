@@ -124,6 +124,10 @@ jobs:
           "bin/${BIN}" --version
           "bin/${BIN}" -e1 -o /tmp/from-bam.bam test/moo.bam
           test -s /tmp/from-bam.bam
+          "bin/${BIN}" -S -e 'chr == "chr1" && pos > 0' -o /tmp/ruby-expr.sam test/moo.bam
+          test -s /tmp/ruby-expr.sam
+          "bin/${BIN}" -S -e 'tag_AS && tag_AS > 35' -o /tmp/ruby-tag.sam test/moo.bam
+          test -s /tmp/ruby-tag.sam
           "bin/${BIN}" -C -f test/moo.fa -e1 -o /tmp/from-bam.cram test/moo.bam
           test -s /tmp/from-bam.cram
 
@@ -258,6 +262,10 @@ jobs:
           "bin/${BIN}" --version
           "bin/${BIN}" -e1 -o /tmp/from-bam.bam test/moo.bam
           test -s /tmp/from-bam.bam
+          "bin/${BIN}" -S -e 'chr == "chr1" && pos > 0' -o /tmp/ruby-expr.sam test/moo.bam
+          test -s /tmp/ruby-expr.sam
+          "bin/${BIN}" -S -e 'tag_AS && tag_AS > 35' -o /tmp/ruby-tag.sam test/moo.bam
+          test -s /tmp/ruby-tag.sam
           "bin/${BIN}" -C -f test/moo.fa -e1 -o /tmp/from-bam.cram test/moo.bam
           test -s /tmp/from-bam.cram
 
