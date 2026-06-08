@@ -211,6 +211,7 @@ jobs:
             --disable-plugins
           make -j"$(sysctl -n hw.ncpu)"
           make install
+          test -f "${GITHUB_WORKSPACE}/vendor/htslib/lib/libhts.a"
 
       - name: Install shards
         run: shards install --without-development
@@ -222,7 +223,10 @@ jobs:
           make src/libkexpr.a
 
           HTSLIB_PC="${GITHUB_WORKSPACE}/vendor/htslib/lib/pkgconfig"
+          HTSLIB_A="${GITHUB_WORKSPACE}/vendor/htslib/lib/libhts.a"
           STATIC_LIBS="$(PKG_CONFIG_PATH="${HTSLIB_PC}" pkg-config --static --libs htslib)"
+          STATIC_LIBS="${STATIC_LIBS//-lhts/}"
+          STATIC_LIBS="${HTSLIB_A} ${STATIC_LIBS}"
           STATIC_LIBS="${STATIC_LIBS} $(brew --prefix libgc)/lib/libgc.a"
           STATIC_LIBS="${STATIC_LIBS} $(brew --prefix pcre2)/lib/libpcre2-8.a"
 
@@ -241,6 +245,10 @@ jobs:
         run: |
           file "bin/${BIN}"
           otool -L "bin/${BIN}"
+          if otool -L "bin/${BIN}" | grep -E 'libhts(\.[0-9]+)?\.dylib'; then
+            echo "Error: htslib dynamic dependency detected"
+            exit 1
+          fi
           if otool -L "bin/${BIN}" | grep -E '/opt/homebrew|/usr/local/Cellar'; then
             echo "Error: Homebrew dynamic dependency detected"
             exit 1
