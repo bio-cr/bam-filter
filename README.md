@@ -6,7 +6,7 @@
 
 [Crystal](https://github.com/crystal-lang/crystal) implementation of [bam-filter](https://github.com/brentp/hts-nim-tools) by Brent Pedersen.
 
-Filter BAM / CRAM / SAM files with a simple expression language.
+Filter BAM / CRAM / SAM files with Ruby expressions.
 
 ```sh
 git clone https://github.com/bio-cr/bam-filter
@@ -33,16 +33,23 @@ Usage: bam-filter [options] <bam_file>
 Example
 
 ```
-bam-filter -S -e "chr=='chr1' && pos > 200 && tag_AS > 35" test/moo.bam
+bam-filter -S -e 'chr == "chr1" && pos > 200 && tag_AS && tag_AS > 35' test/moo.bam
 ```
 
-The given expression is evaluated by [klib/kexpr](https://attractivechaos.github.io/klib/#Kexpr%3A%20parsing%20mathematical%20expressions).
+The given expression is evaluated as Ruby by embedded mruby via [Anyolite](https://github.com/Anyolite/anyolite).
+This is a breaking change from earlier kexpr-based releases: Ruby syntax and truthiness are used inside the expression, with one bam-filter compatibility rule for the final result: `false`, `nil`, numeric `0`, and numeric `0.0` reject a record.
+
+Unset auxiliary tags evaluate to `nil`, so guard tag comparisons with Ruby boolean logic:
+
+```
+bam-filter -S -e 'tag_AS && tag_AS > 35' test/moo.bam
+```
 
 ### Available values in expression
 
 Fields: `name` `flag` `chr` `pos` `start` `stop` `mapq` `mchr` `mpos` `isize`
 
-Flags: `paired` `proper_pair` `unmapped` `mate_unmapped`
+Flags are Ruby booleans: `paired` `proper_pair` `unmapped` `mate_unmapped`
 `reverse` `mate_reverse` `read1` `read2` `secondary`
 `qcfail` `duplicate` `supplementary`
 

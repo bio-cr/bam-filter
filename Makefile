@@ -3,8 +3,6 @@ CRYSTAL_BIN ?= crystal
 SHARDS_BIN ?= shards
 PREFIX ?= /usr/local
 PROGRAM ?= bam-filter
-CC ?= cc
-AR ?= ar
 
 .PHONY: help build test clean cleanall install uninstall
 
@@ -22,12 +20,8 @@ help: ## Show this help message
 
 build: ${PROGRAM}
 
-src/libkexpr.a: src/kexpr.c src/kexpr.h
+${PROGRAM}: src/bam-filter.cr src/ke.cr
 	${SHARDS_BIN} install
-	${CC} -O2 -c -o src/kexpr.o src/kexpr.c
-	${AR} rcs src/libkexpr.a src/kexpr.o
-
-${PROGRAM}: src/bam-filter.cr src/ke.cr src/kexpr.cr src/libkexpr.a
 	${CRYSTAL_BIN} build src/bam-filter.cr --release
 
 test: build
@@ -35,7 +29,6 @@ test: build
 
 clean:
 	${RM} ${PROGRAM}
-	${RM} src/kexpr.o src/libkexpr.a
 
 cleanall: clean
 	${RM} shard.lock

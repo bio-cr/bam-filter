@@ -205,7 +205,7 @@ bam.each do |record|
   {% end %}
   # Flags
   {% for name in FLAG_NAMES %}
-    e.set("{{ name.id }}", (record.flag.{{ name.id }}? ? 1 : 0)) if use["{{ name.id }}"]
+    e.set("{{ name.id }}", record.flag.{{ name.id }}?) if use["{{ name.id }}"]
   {% end %}
   # Auxiliary data
   tags.each do |tag_name|
@@ -214,13 +214,15 @@ bam.each do |record|
   end
 
   # Write
-  if e.bool
-    if e.error_code == 0
-      bam_out.write(record)
-      count += 1
-    else
-      STDERR.puts "[bam-filter] #{e.eval_error}" if debug
-    end
+  keep = e.bool
+  if e.error_code != 0
+    STDERR.puts "[bam-filter] #{e.eval_error}" if debug
+    next
+  end
+
+  if keep
+    bam_out.write(record)
+    count += 1
   end
 end
 

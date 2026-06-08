@@ -1,100 +1,148 @@
-require "./kexpr"
+require "anyolite"
+require "set"
 
 class KE
-  # Parse errors
-  KEE_UNQU = 0x01 # unmatched quotation marks
-  KEE_UNLP = 0x02 # unmatched left parentheses
-  KEE_UNRP = 0x04 # unmatched right parentheses
-  KEE_UNOP = 0x08 # unknown operators
-  KEE_FUNC = 0x10 # wrong function syntax
-  KEE_ARG  = 0x20
-  KEE_NUM  = 0x40 # fail to parse a number
+  alias Value = Bool | Int64 | Float64 | String | Nil
 
-  # Evaluation errors
-  KEE_UNFUNC = 0x40 # undefined function
-  KEE_UNVAR  = 0x80 # unassigned variable
+  @rb : Anyolite::RbInterpreter
+  @names : Array(String)
+  @values : Array(Value)
+  @index : Hash(String, Int32)
+  @proc : Anyolite::RbRef
+  @last_error : String?
 
-  def initialize(s : String)
-    @err = Pointer(Int32).malloc
-    @ke = Kexpr.parse(s, @err)
-    err = @err.value
-    if err != 0
-      raise "#{parse_error(err)} (#{err})"
-    end
+  RUBY_KEYWORDS = Set{
+    "BEGIN", "END", "alias", "and", "begin", "break", "case", "class",
+    "def", "defined", "do", "else", "elsif", "end", "ensure", "false",
+    "for", "if", "in", "module", "next", "nil", "not", "or", "redo",
+    "rescue", "retry", "return", "self", "super", "then", "true",
+    "undef", "unless", "until", "when", "while", "yield",
+  }
+
+  getter error_code : Int32 = 0
+
+  def initialize(@expr : String)
+    @rb = Anyolite::RbInterpreter.new
+    Anyolite::HelperClasses.load_all(@rb)
+    Anyolite.disable_program_execution
+    @names = identifiers(@expr)
+    @values = Array(Value).new(@names.size, nil)
+    @index = Hash(String, Int32).new
+    @names.each_with_index { |name, i| @index[name] = i }
+    @proc = compile(@expr)
   end
 
   def clear
-    @err.value = 0
-    Kexpr.unset(@ke) unless @ke.null?
+    @error_code = 0
+    @values.fill(nil)
+    clear_ruby_error
   end
 
   def finalize
-    Kexpr.destroy(@ke)
-  end
-
-  def to_unsafe
-    @ke
+    @rb.close
   end
 
   def bool
-    Kexpr.eval_real(@ke, @err).abs > 1e-8
-  end
-
-  def error_code
-    @err.value
+    result = Anyolite.call_rb_method_of_object(@proc, "call", @values)
+    if error = last_ruby_error
+      @error_code = 1
+      @last_error = error
+      clear_ruby_error
+      return false
+    end
+    truthy?(result)
   end
 
   def parse_error(err = error_code)
-    if err == 0
-      "no error"
-    elsif (err & KEE_UNQU) != 0
-      "unmatched quotation marks"
-    elsif (err & KEE_UNLP) != 0
-      "unmatched left parentheses"
-    elsif (err & KEE_UNRP) != 0
-      "unmatched right parentheses"
-    elsif (err & KEE_UNOP) != 0
-      "unknown operators"
-    elsif (err & KEE_FUNC) != 0
-      "wrong function syntax"
-    elsif (err & KEE_ARG) != 0
-      "wrong arguments"
-    elsif (err & KEE_NUM) != 0
-      "fail to parse a number"
-    else
-      "unknown error"
-    end
+    err == 0 ? "no error" : (@last_error || "Ruby parse error")
   end
 
   def eval_error(err = error_code)
-    if err == 0
-      "no error"
-    elsif (err & KEE_UNFUNC) != 0
-      "undefined function"
-    elsif (err & KEE_UNVAR) != 0
-      "unassigned variable"
-    else
-      "unknown error"
-    end
+    err == 0 ? "no error" : (@last_error || "Ruby evaluation error")
   end
 
   def set(name : String, v : (Int8 | UInt8 | Int16 | UInt16 | Int32 | UInt32 | Int64 | UInt64))
-    Kexpr.set_int(@ke, name, v)
+    set_value(name, v.to_i64)
+  end
+
+  def set(name : String, v : Bool)
+    set_value(name, v)
   end
 
   def set(name : String, v : (Float32 | Float64))
-    Kexpr.set_real(@ke, name, v)
+    set_value(name, v.to_f64)
   end
 
   def set(name : String, v : String)
-    Kexpr.set_str(@ke, name, v)
+    set_value(name, v)
   end
 
   def set(name : String, v : Char)
-    Kexpr.set_str(@ke, name, v.to_s)
+    set_value(name, v.to_s)
   end
 
   def print
-    Kexpr.print(@ke)
+    puts @expr
+  end
+
+  private def identifiers(expr : String)
+    names = [] of String
+    expr.scan(/[A-Za-z_][A-Za-z0-9_]*/) do |match|
+      name = match[0]
+      next if RUBY_KEYWORDS.includes?(name)
+      next unless variable_name?(name)
+      names << name unless names.includes?(name)
+    end
+    names
+  end
+
+  private def variable_name?(name : String)
+    case name
+    when "name", "flag", "chr", "pos", "start", "stop", "mapq", "mchr", "mpos", "isize",
+         "paired", "proper_pair", "unmapped", "mate_unmapped", "reverse", "mate_reverse",
+         "read1", "read2", "secondary", "qcfail", "duplicate", "supplementary"
+      true
+    else
+      name.starts_with?("tag_")
+    end
+  end
+
+  private def compile(expr : String)
+    params = @names.join(", ")
+    code = "->(#{params}) { #{expr} }"
+    result = @rb.execute_script_line(code, clear_error: false)
+    if error = last_ruby_error
+      @error_code = 1
+      @last_error = error
+      clear_ruby_error
+      raise parse_error
+    end
+    Anyolite::RbRef.new(result)
+  end
+
+  private def set_value(name : String, value : Value)
+    if i = @index[name]?
+      @values[i] = value
+    end
+  end
+
+  private def truthy?(result : Anyolite::RbRef)
+    value = result.value
+    return false if Anyolite::RbCast.check_for_nil(value)
+    return false if Anyolite::RbCast.check_for_false(value)
+    return Anyolite::RbCore.get_rb_fixnum(value) != 0 if Anyolite::RbCast.check_for_fixnum(value)
+    return Anyolite::RbCore.get_rb_float(value).abs > 1e-8 if Anyolite::RbCast.check_for_float(value)
+    true
+  end
+
+  private def last_ruby_error
+    error = Anyolite::RbCore.get_last_rb_error(@rb)
+    return nil if Anyolite::RbCast.check_for_nil(error)
+    rb = @rb.to_unsafe
+    Anyolite::RbCast.cast_to_string(rb, Anyolite::RbCore.rb_inspect(rb, error))
+  end
+
+  private def clear_ruby_error
+    Anyolite::RbCore.clear_last_rb_error(@rb)
   end
 end
