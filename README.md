@@ -1,22 +1,24 @@
 # bam-filter
 
-[![.github/workflows/ci.yml](https://github.com/bio-cr/bam-filter/actions/workflows/ci.yml/badge.svg)](https://github.com/bio-cr/bam-filter/actions/workflows/ci.yml)
-[![Slack](http://img.shields.io/badge/slack-bio--crystal-purple?labelColor=000000&logo=slack)](https://bio-crystal.slack.com/)
-[![Get invite to BioCrystal](http://img.shields.io/badge/Get_invite_to_BioCrystal-purple?labelColor=000000&logo=slack)](https://join.slack.com/t/bio-crystal/shared_invite/zt-tas46pww-JSEloonmn3Ma5eD2~VeT_g)
+Filter BAM, CRAM, and SAM records with Ruby expressions.
 
-[Crystal](https://github.com/crystal-lang/crystal) implementation of [bam-filter](https://github.com/brentp/hts-nim-tools) by Brent Pedersen.
+`bam-filter` is a Crystal command-line tool inspired by Brent Pedersen's Nim-based
+[bam-filter](https://github.com/brentp/hts-nim-tools). Expressions are evaluated
+with embedded [mruby](https://github.com/mruby/mruby) via
+[Anyolite](https://github.com/Anyolite/anyolite).
 
-Filter BAM / CRAM / SAM files with Ruby expressions.
+## Installation
 
 ```sh
 git clone https://github.com/bio-cr/bam-filter
+cd bam-filter
 make
 sudo make install
 ```
 
 ## Usage
 
-```
+```text
 Usage: bam-filter [options] <bam_file>
     -e, --expression EXPR            eval code
     -o, --output PATH                Write output to FILE [standard output]
@@ -30,35 +32,55 @@ Usage: bam-filter [options] <bam_file>
     -v, --version                    Show version number
 ```
 
-Example
+## Examples
 
-```
-bam-filter -S -e 'chr == "chr1" && pos > 200 && tag_AS && tag_AS > 35' test/moo.bam
-```
+Write SAM records on chromosome 1 after position 200 with an `AS` tag greater than
+35:
 
-The given expression is evaluated as Ruby by embedded mruby via [Anyolite](https://github.com/Anyolite/anyolite).
-This is a breaking change from earlier kexpr-based releases: Ruby syntax and truthiness are used inside the expression, with one bam-filter compatibility rule for the final result: `false`, `nil`, numeric `0`, and numeric `0.0` reject a record.
-
-Unset auxiliary tags evaluate to `nil`, so guard tag comparisons with Ruby boolean logic:
-
-```
-bam-filter -S -e 'tag_AS && tag_AS > 35' test/moo.bam
+```sh
+bam-filter -S -e 'chr == "chr1" && pos > 200 && tag_AS && tag_AS > 35' input.bam
 ```
 
-### Available values in expression
+Write BAM output:
 
-Fields: `name` `flag` `chr` `pos` `start` `stop` `mapq` `mchr` `mpos` `isize`
+```sh
+bam-filter -e 'mapq >= 30 && !duplicate' -o filtered.bam input.bam
+```
 
-Flags are Ruby booleans: `paired` `proper_pair` `unmapped` `mate_unmapped`
-`reverse` `mate_reverse` `read1` `read2` `secondary`
-`qcfail` `duplicate` `supplementary`
+Write CRAM output:
 
-Tags: `tag_XX` (XX is aux tag)
+```sh
+bam-filter -C -f reference.fa -e 'proper_pair && !unmapped' -o filtered.cram input.bam
+```
 
-## Contributing
+## Expressions
 
-Bug fixes and macOS support are welcome.
+Expressions use Ruby syntax. A record is kept unless the final expression value is
+`false`, `nil`, numeric `0`, or numeric `0.0`.
 
-## Note
+Available fields:
 
-bam-filter was originally created to develop and test [HTS.cr](https://github.com/bio-cr/hts.cr).
+```text
+name flag chr pos start stop mapq mchr mpos isize
+```
+
+Available flag booleans:
+
+```text
+paired proper_pair unmapped mate_unmapped reverse mate_reverse
+read1 read2 secondary qcfail duplicate supplementary
+```
+
+Auxiliary tags are available as `tag_XX`, where `XX` is a two-character SAM tag.
+Missing tags evaluate to `nil`, so guard comparisons explicitly:
+
+```sh
+bam-filter -e 'tag_AS && tag_AS > 35' input.bam
+```
+
+## Development
+
+```sh
+make
+make test
+```
