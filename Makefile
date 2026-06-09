@@ -20,7 +20,7 @@ help: ## Show this help message
 
 build: ${PROGRAM}
 
-${PROGRAM}: src/bam-filter.cr src/ke.cr
+${PROGRAM}: src/bam-filter.cr src/ke.cr shard.yml
 	${SHARDS_BIN} install
 	${CRYSTAL_BIN} build src/bam-filter.cr --release
 
