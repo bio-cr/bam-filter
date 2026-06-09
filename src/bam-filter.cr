@@ -64,7 +64,7 @@ OptionParser.parse do |parser|
     EOS
   parser.summary_width = 22
   parser.on("-e", "--expression EXPR", "eval code") { |v| expr = v }
-  parser.on("-r", "--require PATH", "Load Ruby script file before evaluating expression (repeatable)") { |v| require_files << v }
+  parser.on("-r", "--require PATH", "Load Ruby script file before evaluating expression") { |v| require_files << v }
   parser.on("-o", "--output PATH", "Write output to FILE [standard output]") { |v| output_file = v }
   parser.on("-f", "--fasta FASTA", "Reference sequence FASTA FILE [null]") { |v| input_fasta = v }
   parser.on("-S", "--sam", "Output SAM") { mode = "w" }

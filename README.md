@@ -29,7 +29,7 @@ sudo make install
 ```text
 Usage: bam-filter [options] <bam_file>
     -e, --expression EXPR            eval code
-    -r, --require PATH               Load Ruby script file before evaluating expression (repeatable)
+    -r, --require PATH               Load Ruby script file before evaluating expression
     -o, --output PATH                Write output to FILE [standard output]
     -f, --fasta FASTA                Reference sequence FASTA FILE [null]
     -S, --sam                        Output SAM
