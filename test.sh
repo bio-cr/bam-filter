@@ -37,6 +37,14 @@ test -s "$tmpdir/tag.sam"
 
 ./bam-filter -S -e 'name.start_with?("read")' -o "$tmpdir/name-method.sam" test/moo.bam >/dev/null
 
+cat >"$tmpdir/helper.rb" <<'RUBY'
+def keep_record(mapq)
+  mapq > 0
+end
+RUBY
+./bam-filter -r "$tmpdir/helper.rb" -e 'keep_record(mapq)' -o "$tmpdir/required-helper.bam" test/moo.bam >/dev/null
+test -s "$tmpdir/required-helper.bam"
+
 if ./bam-filter -e 'chr ==' -o "$tmpdir/parse-error.bam" test/moo.bam >/dev/null 2>"$tmpdir/parse-error.err"; then
   echo "expected parse error to fail" >&2
   exit 1

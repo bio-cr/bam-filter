@@ -29,6 +29,7 @@ sudo make install
 ```text
 Usage: bam-filter [options] <bam_file>
     -e, --expression EXPR            eval code
+    -r, --require PATH               Load Ruby script file before evaluating expression (repeatable)
     -o, --output PATH                Write output to FILE [standard output]
     -f, --fasta FASTA                Reference sequence FASTA FILE [null]
     -S, --sam                        Output SAM
@@ -59,6 +60,12 @@ Write CRAM output:
 
 ```sh
 bam-filter -C -f reference.fa -e 'proper_pair && !unmapped' -o filtered.cram input.bam
+```
+
+Load Ruby helper scripts before expression evaluation:
+
+```sh
+bam-filter -r helpers.rb -r filters.rb -e 'keep_record(mapq, tag_AS)' -o filtered.bam input.bam
 ```
 
 ## Expressions

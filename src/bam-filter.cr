@@ -42,6 +42,7 @@ nthreads = 0
 input_file = ""
 output_file = "-" # standard output
 input_fasta = ""
+require_files = [] of String
 mode = ""
 
 count = 0
@@ -63,6 +64,7 @@ OptionParser.parse do |parser|
     EOS
   parser.summary_width = 22
   parser.on("-e", "--expression EXPR", "eval code") { |v| expr = v }
+  parser.on("-r", "--require PATH", "Load Ruby script file before evaluating expression (repeatable)") { |v| require_files << v }
   parser.on("-o", "--output PATH", "Write output to FILE [standard output]") { |v| output_file = v }
   parser.on("-f", "--fasta FASTA", "Reference sequence FASTA FILE [null]") { |v| input_fasta = v }
   parser.on("-S", "--sam", "Output SAM") { mode = "w" }
@@ -131,6 +133,13 @@ if expr.empty?
   exit(1)
 end
 
+require_files.each do |file|
+  unless File.exists?(file)
+    STDERR.puts "[bam-filter] ERROR: require file not found. #{file}"
+    exit(1)
+  end
+end
+
 if mode.empty?
   mode = case File.extname(output_file)
          when ".sam"
@@ -185,7 +194,7 @@ end
 # Main
 
 begin
-  e = KE.new(expr)
+  e = KE.new(expr, require_files)
 rescue ex : Exception
   STDERR.puts "[bam-filter] ERROR: failed to parse expression. #{ex.message}"
   exit(1)

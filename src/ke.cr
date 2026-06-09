@@ -21,10 +21,11 @@ class KE
 
   getter error_code : Int32 = 0
 
-  def initialize(@expr : String)
+  def initialize(@expr : String, require_files : Array(String) = [] of String)
     @rb = Anyolite::RbInterpreter.new
     Anyolite::HelperClasses.load_all(@rb)
     Anyolite.disable_program_execution
+    load_require_files(require_files)
     @names = identifiers(@expr)
     @values = Array(Value).new(@names.size, nil)
     @index = Hash(String, Int32).new
@@ -120,6 +121,26 @@ class KE
       raise parse_error
     end
     Anyolite::RbRef.new(result)
+  end
+
+  private def load_require_files(files : Array(String))
+    files.each do |path|
+      begin
+        code = File.read(path)
+      rescue ex : Exception
+        @rb.close
+        raise "failed to read require file #{path}. #{ex.message}"
+      end
+
+      @rb.execute_script_line(code, clear_error: false)
+      if error = last_ruby_error
+        @error_code = 1
+        @last_error = error
+        clear_ruby_error
+        @rb.close
+        raise "failed to load require file #{path}. #{@last_error}"
+      end
+    end
   end
 
   private def set_value(name : String, value : Value)
