@@ -3,6 +3,7 @@
 [![CI](https://github.com/bio-cr/bam-filter/actions/workflows/ci.yml/badge.svg)](https://github.com/bio-cr/bam-filter/actions/workflows/ci.yml)
 [![build](https://github.com/bio-cr/bam-filter/actions/workflows/build.yml/badge.svg)](https://github.com/bio-cr/bam-filter/actions/workflows/build.yml)
 [![Lines of Code](https://img.shields.io/endpoint?url=https%3A%2F%2Ftokei.kojix2.net%2Fbadge%2Fgithub%2Fbio-cr%2Fbam-filter%2Flines)](https://tokei.kojix2.net/github/bio-cr/bam-filter)
+[![DOI](https://zenodo.org/badge/449592427.svg)](https://doi.org/10.5281/zenodo.6462575)
 
 Filter BAM, CRAM, and SAM records with Ruby expressions.
 
