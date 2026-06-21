@@ -35,6 +35,10 @@ test -s "$tmpdir/flags.sam"
 ./bam-filter -S -e 'tag_AS && tag_AS > 35' -o "$tmpdir/tag.sam" test/moo.bam >/dev/null
 test -s "$tmpdir/tag.sam"
 
+./bam-filter -S -e 'tag_XB && tag_XB[0] == 1 && tag_XB.include?(3) && tag_XF && tag_XF[1] > 2.0' -o "$tmpdir/array-tags-filtered.sam" test/array-tags.sam >/dev/null
+test "$(grep -vc '^@' "$tmpdir/array-tags-filtered.sam")" -eq 1
+grep -q '^array_pass[[:space:]]' "$tmpdir/array-tags-filtered.sam"
+
 ./bam-filter -S -e 'name.start_with?("read")' -o "$tmpdir/name-method.sam" test/moo.bam >/dev/null
 
 ./bam-filter -S -r test/thresholds.rb -r test/filters.rb -e 'keep_record(chr, mapq, tag_AS)' -o "$tmpdir/required-helper.sam" test/moo.bam >/dev/null

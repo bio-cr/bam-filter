@@ -2,7 +2,7 @@ require "anyolite"
 require "set"
 
 class KE
-  alias Value = Bool | Int64 | Float64 | String | Nil
+  alias Value = Bool | Int64 | Float64 | String | Array(Int64) | Array(Float64) | Nil
 
   @rb : Anyolite::RbInterpreter
   @names : Array(String)
@@ -81,6 +81,10 @@ class KE
 
   def set(name : String, v : Char)
     set_value(name, v.to_s)
+  end
+
+  def set(name : String, v : Array(Int64) | Array(Float64))
+    set_value(name, v)
   end
 
   def print

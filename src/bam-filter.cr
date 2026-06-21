@@ -35,6 +35,34 @@ def parse_non_negative_int(value : String, option : String) : Int32
   num
 end
 
+def set_aux_tag_value(e : KE, tag_name : String, value) : Nil
+  case value
+  when Int
+    e.set("tag_#{tag_name}", value.to_i64)
+  when Float
+    e.set("tag_#{tag_name}", value.to_f64)
+  when String
+    e.set("tag_#{tag_name}", value)
+  when Char
+    e.set("tag_#{tag_name}", value)
+  when Array(Int64), Array(Float64)
+    e.set("tag_#{tag_name}", value)
+  end
+end
+
+def set_aux_tags(e : KE, record : HTS::Bam::Record, tag_set : Set(String)) : Nil
+  return if tag_set.empty?
+
+  remaining = tag_set.size
+  record.aux.each do |tag, value|
+    next unless tag_set.includes?(tag)
+
+    set_aux_tag_value(e, tag, value)
+    remaining -= 1
+    break if remaining == 0
+  end
+end
+
 expr = ""
 debug = false
 nthreads = 0
@@ -46,7 +74,7 @@ require_files = [] of String
 mode = ""
 
 count = 0
-tags = [] of String
+tag_set = Set(String).new
 
 # @PG line in the output BAM header
 CL = [Process.executable_path || PROGRAM_NAME].concat(ARGV).join(" ")
@@ -184,7 +212,7 @@ identifiers.each do |identifier|
 
   tag = identifier.lchop("tag_")
   if tag.size == 2 && tag.matches?(/^[A-Za-z0-9]{2}$/)
-    tags << tag
+    tag_set.add(tag)
   else
     STDERR.puts "[bam-filter] ERROR: Incorrect tag name. #{identifier}"
     exit(1)
@@ -217,10 +245,7 @@ bam.each do |record|
     e.set("{{ name.id }}", record.flag.{{ name.id }}?) if use["{{ name.id }}"]
   {% end %}
   # Auxiliary data
-  tags.each do |tag_name|
-    value = record.aux(tag_name)
-    e.set("tag_#{tag_name}", value) unless value.nil?
-  end
+  set_aux_tags(e, record, tag_set)
 
   # Write
   keep = e.bool
