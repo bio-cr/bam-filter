@@ -46,6 +46,10 @@ class KE
 
   def bool
     rb = @rb.to_unsafe
+    # Each record creates temporary Ruby objects.
+    # Examples are strings and arrays.
+    # Reset the mruby GC arena after each eval.
+    # This keeps those objects from staying protected.
     arena = Anyolite::RbCore.rb_gc_arena_save(rb)
     result = Anyolite.call_rb_method_of_object(@proc, "call", @values)
     if error = last_ruby_error
