@@ -37,17 +37,7 @@ test -s "$tmpdir/tag.sam"
 
 ./bam-filter -S -e 'name.start_with?("read")' -o "$tmpdir/name-method.sam" test/moo.bam >/dev/null
 
-cat >"$tmpdir/thresholds.rb" <<'RUBY'
-def passing_alignment_score?(score)
-  score && score >= 37
-end
-RUBY
-cat >"$tmpdir/filters.rb" <<'RUBY'
-def keep_record(chr, mapq, score)
-  chr == "chr1" && mapq == 60 && passing_alignment_score?(score)
-end
-RUBY
-./bam-filter -S -r "$tmpdir/thresholds.rb" -r "$tmpdir/filters.rb" -e 'keep_record(chr, mapq, tag_AS)' -o "$tmpdir/required-helper.sam" test/moo.bam >/dev/null
+./bam-filter -S -r test/thresholds.rb -r test/filters.rb -e 'keep_record(chr, mapq, tag_AS)' -o "$tmpdir/required-helper.sam" test/moo.bam >/dev/null
 test "$(grep -vc '^@' "$tmpdir/required-helper.sam")" -eq 2
 grep -q '^chr1_179_692_1:0:0_1:1:1_0[[:space:]]73[[:space:]]chr1[[:space:]]179[[:space:]]60[[:space:]]40M' "$tmpdir/required-helper.sam"
 grep -q '^chr1_475_941_0:0:0_0:3:0_1[[:space:]]97[[:space:]]chr1[[:space:]]475[[:space:]]60[[:space:]]40M' "$tmpdir/required-helper.sam"
