@@ -2,7 +2,7 @@ require "anyolite"
 require "set"
 
 class KE
-  alias Value = Bool | Int64 | Float64 | String | Array(Int64) | Array(Float64) | Nil
+  alias Value = (Bool | Int64 | Float64 | String | Array(Int64) | Array(Float64))?
 
   @rb : Anyolite::RbInterpreter
   @names : Array(String)
@@ -169,7 +169,7 @@ class KE
 
   private def last_ruby_error
     error = Anyolite::RbCore.get_last_rb_error(@rb)
-    return nil if Anyolite::RbCast.check_for_nil(error)
+    return if Anyolite::RbCast.check_for_nil(error)
     rb = @rb.to_unsafe
     Anyolite::RbCast.cast_to_string(rb, Anyolite::RbCore.rb_inspect(rb, error))
   end

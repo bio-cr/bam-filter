@@ -67,7 +67,6 @@ expr = ""
 debug = false
 nthreads = 0
 
-input_file = ""
 output_file = "-" # standard output
 input_fasta = ""
 require_files = [] of String
