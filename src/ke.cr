@@ -51,17 +51,18 @@ class KE
     # Reset the mruby GC arena after each eval.
     # This keeps those objects from staying protected.
     arena = Anyolite::RbCore.rb_gc_arena_save(rb)
-    result = Anyolite.call_rb_method_of_object(@proc, "call", @values)
-    if error = last_ruby_error
-      @error_code = 1
-      @last_error = error
-      clear_ruby_error
+    begin
+      result = Anyolite.call_rb_method_of_object(@proc, "call", @values)
+      if error = last_ruby_error
+        @error_code = 1
+        @last_error = error
+        clear_ruby_error
+        return false
+      end
+      truthy?(result)
+    ensure
       Anyolite::RbCore.rb_gc_arena_restore(rb, arena)
-      return false
     end
-    value = truthy?(result)
-    Anyolite::RbCore.rb_gc_arena_restore(rb, arena)
-    value
   end
 
   def parse_error(err = error_code)
