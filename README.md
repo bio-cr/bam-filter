@@ -88,10 +88,18 @@ read1 read2 secondary qcfail duplicate supplementary
 ```
 
 Auxiliary tags are available as `tag_XX`, where `XX` is a two-character SAM tag.
-Missing tags evaluate to `nil`, so guard comparisons explicitly:
+Integer, float, string, character, and numeric `B` array tags can be used from
+Ruby expressions. Missing tags evaluate to `nil`, so guard comparisons
+explicitly:
 
 ```sh
 bam-filter -e 'tag_AS && tag_AS > 35' input.bam
+```
+
+Array tags are exposed as Ruby arrays:
+
+```sh
+bam-filter -e 'tag_XB && tag_XB[0] == 1 && tag_XB.include?(3)' input.bam
 ```
 
 ## Development
