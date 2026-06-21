@@ -45,14 +45,19 @@ class KE
   end
 
   def bool
+    rb = @rb.to_unsafe
+    arena = Anyolite::RbCore.rb_gc_arena_save(rb)
     result = Anyolite.call_rb_method_of_object(@proc, "call", @values)
     if error = last_ruby_error
       @error_code = 1
       @last_error = error
       clear_ruby_error
+      Anyolite::RbCore.rb_gc_arena_restore(rb, arena)
       return false
     end
-    truthy?(result)
+    value = truthy?(result)
+    Anyolite::RbCore.rb_gc_arena_restore(rb, arena)
+    value
   end
 
   def parse_error(err = error_code)
